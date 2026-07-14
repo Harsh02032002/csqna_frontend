@@ -25,6 +25,7 @@ import TermsConditions from './pages/TermsConditions';
 import UserConsent from './pages/UserConsent';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 
 // User Dashboard Pages
 import UserDashboard from './pages/user/Dashboard';
@@ -39,12 +40,32 @@ import Users from './pages/admin/Users';
 import UploadQuestions from './pages/admin/UploadQuestions';
 
 const PublicLayout: React.FC = () => {
+  const hostname = window.location.hostname;
+
+  // Detect if we are on a certificate subdomain
+  const isCehSub = hostname.includes('ceh.csqna.com');
+  const isCisaSub = hostname.includes('cisa.csqna.com');
+  const isCippSub = hostname.includes('cipp.csqna.com');
+  const isCisspSub = hostname.includes('cissp.csqna.com');
+  const isDpdpSub = hostname.includes('dpdp.csqna.com');
+  const isIsoSub = hostname.includes('iso.csqna.com');
+  const isAaiaSub = hostname.includes('aaia.csqna.com');
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={
+            isCehSub ? <Ceh /> :
+            isCisaSub ? <Cisa /> :
+            isCippSub ? <Cipp /> :
+            isCisspSub ? <Cissp /> :
+            isDpdpSub ? <Dpdp /> :
+            isIsoSub ? <Iso /> :
+            isAaiaSub ? <Aaia /> :
+            <Home />
+          } />
           <Route path="/services" element={<Services />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<About />} />
@@ -53,6 +74,8 @@ const PublicLayout: React.FC = () => {
           <Route path="/user-consent-agreement" element={<UserConsent />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verifyemail/:token" element={<VerifyEmail />} />
+          <Route path="/verify-email/:token" element={<VerifyEmail />} />
           <Route path="/ceh" element={<Ceh />} />
           <Route path="/cisa" element={<Cisa />} />
           <Route path="/cipp" element={<Cipp />} />

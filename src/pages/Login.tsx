@@ -111,7 +111,7 @@ export const Login: React.FC = () => {
                   className="form-check-input"
                   id="verifyAsHuman"
                   required
-                  style={{ cursor: 'pointer', width: '16px', height: '16px', marginRight: '8px', marginTop: '0' }}
+                  style={{ position: 'relative', marginLeft: '0', cursor: 'pointer', width: '16px', height: '16px', marginRight: '8px', marginTop: '0' }}
                 />
                 <label className="form-check-label" htmlFor="verifyAsHuman" style={{ fontSize: '14px', color: '#475569', cursor: 'pointer', fontWeight: '500', userSelect: 'none' }}>
                   Verify As Human

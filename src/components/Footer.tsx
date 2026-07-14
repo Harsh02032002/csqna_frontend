@@ -133,6 +133,9 @@ export const Footer: React.FC = () => {
         <div className="container">
           <div className="row">
             <div className="col-lg-12 text-center copy-right-text">
+              <div className="disclaimer-box text-center rt-mb-20" style={{ fontSize: '13px', opacity: 0.8, color: '#94A3B8', maxWidth: '800px', margin: '0 auto 15px auto', lineHeight: '1.6' }}>
+                <strong>Disclaimer:</strong> CSQNA is an independent educational provider of practice tests and study materials. CISA, CISSP, CIPP, CEH, and other certification names/registered trademarks are properties of their respective owners (such as ISACA, ISC², IAPP, EC-Council). CSQNA is not affiliated with, authorized, sponsored, or endorsed by any of these certification owners.
+              </div>
               Copyright © 2026-2030. All Rights Reserved By <a href="https://csqna.com" className="primary-color">CSQNA</a>
             </div>
           </div>

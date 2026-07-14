@@ -49193,16 +49193,3 @@ ul.stepsContent li{
 .tncnp li::marker {
   font-size: 1.2em;
 }
-
-
-/* ===== CERT PAGE HEADING OVERRIDES ===== */
-.cert-page h2,
-.cert-page h3,
-.cert-page h4,
-.cert-page .rt-section-title {
-    color: #854c93 !important;
-}
-.cert-page .rt-breadcump h1,
-.cert-page .rt-breadcump .text-white {
-    color: #fff !important;
-}

@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (emailOrUsername: string, password: string) => {
     setLoading(true);
     try {
-      const res = await api.post('/auth/login', { username: emailOrUsername, password });
+      const res = await api.post('/auth/login', { email: emailOrUsername, password });
       if (res.data && res.data.status) {
         const { token: t, user: u } = res.data.data;
         const mappedUser: UserDetails = {

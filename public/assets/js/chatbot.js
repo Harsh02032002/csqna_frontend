@@ -67,11 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             // Determine API URL based on environment (development vs production)
-            const apiUrl = window.CHAT_API_URL && !window.CHAT_API_URL.includes('%') && !window.CHAT_API_URL.includes('undefined')
-                ? window.CHAT_API_URL 
-                : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                    ? 'http://localhost:5003/v1/chat' 
-                    : 'https://api.csqna.com/v1/chat');
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:5003/v1/chat' 
+                : 'https://api.csqna.com/v1/chat';
 
             const response = await fetch(apiUrl, {
                 method: "POST",

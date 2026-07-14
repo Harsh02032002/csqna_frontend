@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node copy-assets.js && tsc && vite build",
+    "build": "node copy-assets.js && tsc && vite build && node post-build.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "copy-assets": "node copy-assets.js"
