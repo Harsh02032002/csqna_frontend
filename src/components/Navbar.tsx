@@ -6,6 +6,18 @@ export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const isProd = window.location.hostname.includes('csqna.com') && !window.location.hostname.includes('localhost');
+
+  const certs = [
+    { name: 'CISA', path: '/cisa', sub: 'cisa' },
+    { name: 'CEH', path: '/ceh', sub: 'ceh' },
+    { name: 'CIPP', path: '/cipp', sub: 'cipp' },
+    { name: 'CISSP', path: '/cissp', sub: 'cissp' },
+    { name: 'DPDP', path: '/dpdp', sub: 'dpdp' },
+    { name: 'ISO 27001', path: '/iso', sub: 'iso' },
+    { name: 'AAIA', path: '/aaia', sub: 'aaia' },
+  ];
+
   return (
     <header className="rt-site-header rt-fixed-top dark-menu" style={{ background: 'var(--footer-bg) !important', boxShadow: '0 2px 3px 0 rgba(0, 0, 0, .1) !important' }}>
       <div className="main-header rt-sticky" style={{ background: 'var(--footer-bg) !important', padding: '4px 0 !important' }}>
@@ -26,13 +38,15 @@ export const Navbar: React.FC = () => {
                   <li className="menu-item-has-children">
                     <a href="#" onClick={(e) => e.preventDefault()}>Certifications</a>
                     <ul className="sub-menu">
-                      <li><Link to="/cisa">CISA</Link></li>
-                      <li><Link to="/ceh">CEH</Link></li>
-                      <li><Link to="/cipp">CIPP</Link></li>
-                      <li><Link to="/cissp">CISSP</Link></li>
-                      <li><Link to="/dpdp">DPDP</Link></li>
-                      <li><Link to="/iso">ISO 27001</Link></li>
-                      <li><Link to="/aaia">AAIA</Link></li>
+                      {certs.map((cert) => (
+                        <li key={cert.sub}>
+                          {isProd ? (
+                            <a href={`https://${cert.sub}.csqna.com/`}>{cert.name}</a>
+                          ) : (
+                            <Link to={cert.path}>{cert.name}</Link>
+                          )}
+                        </li>
+                      ))}
                     </ul>
                   </li>
                   <li><Link to="/pricing">Pricing</Link></li>
