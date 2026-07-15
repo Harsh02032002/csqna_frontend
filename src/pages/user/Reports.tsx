@@ -67,76 +67,66 @@ export const Reports: React.FC = () => {
   };
 
   return (
-    <div className="main-panel rt-pt-57" style={{ paddingLeft: 0 }}>
-      <div className="content">
-        <div className="container-fluid">
-          <div className="row column_title page_title">
-            <div className="col-md-12">
-              <h2 className="rt-pt-10 rt-pb-10" style={{ fontWeight: 'bold', fontSize: '24px', color: '#1a3456' }}>Reports &amp; Scores</h2>
-            </div>
-          </div>
-
-          <div className="white_card card_height_100 p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Search test names..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="form-control"
-                style={{ maxWidth: '300px', borderRadius: '8px', fontSize: '14px' }}
-              />
-            </div>
-
-            {loading ? (
-              <div className="text-center py-5 text-muted font-weight-bold">
-                Extracting candidate sheets...
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="text-center py-5 text-muted">
-                No completed test logs found.
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>Test Name</th>
-                      <th>Date</th>
-                      <th>Questions</th>
-                      <th>Score</th>
-                      <th className="text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((t) => (
-                      <tr key={t._id}>
-                        <td className="font-weight-bold" style={{ color: '#1a3456' }}>{t.testname}</td>
-                        <td>{new Date(t.createdAt).toLocaleDateString()}</td>
-                        <td>{t.totalQuestions || 0}</td>
-                        <td className="text-primary font-weight-bold">{t.score?.toFixed(1) || 0}%</td>
-                        <td className="text-right">
-                          <button
-                            onClick={() => setSelectedTest(t)}
-                            className="btn btn-outline-primary btn-sm mr-2"
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={() => handlePrint(t)}
-                            className="btn btn-outline-secondary btn-sm"
-                          >
-                            Print
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+    <div className="container-fluid">
+      <div className="row column_title page_title">
+        <div className="col-md-12">
+          <h2 className="rt-pt-10 rt-pb-10" style={{ fontWeight: 'bold', fontSize: '24px', color: '#1a3456' }}>Reports &amp; Scores</h2>
         </div>
+      </div>
+
+      <div className="white_card card_height_100 p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search test names..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="form-control"
+            style={{ maxWidth: '300px', borderRadius: '8px', fontSize: '14px' }}
+          />
+        </div>
+
+        {loading ? (
+          <div className="text-center py-5 text-muted font-weight-bold">
+            Extracting candidate sheets...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-5 text-muted">
+            No completed test logs found.
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Test Name</th>
+                  <th>Date</th>
+                  <th>Questions</th>
+                  <th>Score</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((t) => (
+                  <tr key={t._id}>
+                    <td className="font-weight-bold" style={{ color: '#1a3456' }}>{t.testname}</td>
+                    <td>{new Date(t.createdAt).toLocaleDateString()}</td>
+                    <td>{t.totalQuestions || 0}</td>
+                    <td className="text-primary font-weight-bold">{t.score?.toFixed(1) || 0}%</td>
+                    <td className="text-right">
+                      <button onClick={() => setSelectedTest(t)} className="btn btn-outline-primary btn-sm mr-2">
+                        View
+                      </button>
+                      <button onClick={() => handlePrint(t)} className="btn btn-outline-secondary btn-sm">
+                        Print
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Quick View Modal */}

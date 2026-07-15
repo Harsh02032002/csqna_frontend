@@ -53,7 +53,7 @@ export const Login: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} autoComplete="off">
               {/* Email / Username field */}
               <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
@@ -62,6 +62,7 @@ export const Login: React.FC = () => {
                 <input
                   type="text"
                   required
+                  autoComplete="off"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
@@ -78,6 +79,7 @@ export const Login: React.FC = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     required
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}

@@ -31,7 +31,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await api.post('/auth/login', { email: emailOrUsername, password });
       if (res.data && res.data.status) {
-        const { token: t, user: u } = res.data.data;
+        const t = res.data.token;
+        const u = res.data.data;
         const mappedUser: UserDetails = {
           id: u.id || u._id,
           name: u.name || u.fullname || u.username,

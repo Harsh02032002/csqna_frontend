@@ -90,14 +90,14 @@ const PublicLayout: React.FC = () => {
 const ProtectedUserRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
-  if (user.role === 'admin') return <Navigate to="/admin/dashboard" />;
+  if (user.role === 'admin' || user.role === '0x88') return <Navigate to="/admin/dashboard" />;
   return <>{children}</>;
 };
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
-  if (user.role !== 'admin') return <Navigate to="/panel/dashboard" />;
+  if (user.role !== 'admin' && user.role !== '0x88') return <Navigate to="/panel/dashboard" />;
   return <>{children}</>;
 };
 

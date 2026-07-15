@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 const distDir = './dist';
-const certs = ['cisa', 'cissp', 'ceh', 'cipp', 'dpdp', 'iso', 'aaia'];
+const certs = ['cisa', 'ceh', 'cipp', 'dpdp', 'iso', 'aaia'];
 
 function copyRecursiveSync(src, dest) {
   const exists = fs.existsSync(src);

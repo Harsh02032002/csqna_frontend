@@ -67,133 +67,129 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="main-panel rt-pt-57" style={{ paddingLeft: 0 }}>
-      <div className="content">
-        <div className="container-fluid">
-          <div className="row column_title page_title">
-            <div className="col-md-12">
-              <h2 className="rt-pt-10 rt-pb-10" style={{ fontWeight: 'bold', fontSize: '24px', color: '#1a3456' }}>Account Settings</h2>
-            </div>
-          </div>
+    <div className="container-fluid">
+      <div className="row column_title page_title">
+        <div className="col-md-12">
+          <h2 className="rt-pt-10 rt-pb-10" style={{ fontWeight: 'bold', fontSize: '24px', color: '#1a3456' }}>Account Settings</h2>
+        </div>
+      </div>
 
-          <div className="row">
-            {/* Personal Details */}
-            <div className="col-md-6 mb-4">
-              <form onSubmit={handleUpdateProfile} className="white_card p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                <h4 className="mb-4" style={{ fontWeight: 'bold', color: '#1a3456' }}>Personal Identity</h4>
+      <div className="row">
+        {/* Personal Details */}
+        <div className="col-md-6 mb-4">
+          <form onSubmit={handleUpdateProfile} className="white_card p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+            <h4 className="mb-4" style={{ fontWeight: 'bold', color: '#1a3456' }}>Personal Identity</h4>
 
-                {profileMsg && (
-                  <div className="alert alert-info" style={{ fontSize: '13px' }}>
-                    {profileMsg}
-                  </div>
-                )}
+            {profileMsg && (
+              <div className="alert alert-info" style={{ fontSize: '13px' }}>
+                {profileMsg}
+              </div>
+            )}
 
-                <div className="form-group mb-3">
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Username</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={user?.username || ''}
-                    className="form-control"
-                    style={{ borderRadius: '8px', fontSize: '14px', background: '#f9f9f9', cursor: 'not-allowed' }}
-                  />
-                </div>
-
-                <div className="form-group mb-3">
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Email Address</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={user?.email || ''}
-                    className="form-control"
-                    style={{ borderRadius: '8px', fontSize: '14px', background: '#f9f9f9', cursor: 'not-allowed' }}
-                  />
-                </div>
-
-                <div className="form-group mb-4">
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Full Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
-                    className="form-control"
-                    style={{ borderRadius: '8px', fontSize: '14px' }}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loadingProfile}
-                  className="btn btn-primary w-100 rt-btn rt-gradient pill text-uppercase"
-                  style={{ border: 'none', fontWeight: 'bold' }}
-                >
-                  {loadingProfile ? 'Updating...' : 'Update Details'}
-                </button>
-              </form>
+            <div className="form-group mb-3">
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Username</label>
+              <input
+                type="text"
+                disabled
+                value={user?.username || ''}
+                className="form-control"
+                style={{ borderRadius: '8px', fontSize: '14px', background: '#f9f9f9', cursor: 'not-allowed' }}
+              />
             </div>
 
-            {/* Change Password */}
-            <div className="col-md-6 mb-4">
-              <form onSubmit={handleUpdatePassword} className="white_card p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                <h4 className="mb-4" style={{ fontWeight: 'bold', color: '#1a3456' }}>Access Key Update</h4>
-
-                {passwordMsg && (
-                  <div className="alert alert-info" style={{ fontSize: '13px' }}>
-                    {passwordMsg}
-                  </div>
-                )}
-
-                <div className="form-group mb-3">
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Current Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="form-control"
-                    style={{ borderRadius: '8px', fontSize: '14px' }}
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                <div className="form-group mb-3">
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>New Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="form-control"
-                    style={{ borderRadius: '8px', fontSize: '14px' }}
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                <div className="form-group mb-4">
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Confirm New Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="form-control"
-                    style={{ borderRadius: '8px', fontSize: '14px' }}
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loadingPassword}
-                  className="btn btn-primary w-100 rt-btn rt-gradient pill text-uppercase"
-                  style={{ border: 'none', fontWeight: 'bold' }}
-                >
-                  {loadingPassword ? 'Confirming...' : 'Update Password'}
-                </button>
-              </form>
+            <div className="form-group mb-3">
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Email Address</label>
+              <input
+                type="text"
+                disabled
+                value={user?.email || ''}
+                className="form-control"
+                style={{ borderRadius: '8px', fontSize: '14px', background: '#f9f9f9', cursor: 'not-allowed' }}
+              />
             </div>
-          </div>
+
+            <div className="form-group mb-4">
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Full Name</label>
+              <input
+                type="text"
+                required
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+                className="form-control"
+                style={{ borderRadius: '8px', fontSize: '14px' }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loadingProfile}
+              className="btn btn-primary w-100 rt-btn rt-gradient pill text-uppercase"
+              style={{ border: 'none', fontWeight: 'bold' }}
+            >
+              {loadingProfile ? 'Updating...' : 'Update Details'}
+            </button>
+          </form>
+        </div>
+
+        {/* Change Password */}
+        <div className="col-md-6 mb-4">
+          <form onSubmit={handleUpdatePassword} className="white_card p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+            <h4 className="mb-4" style={{ fontWeight: 'bold', color: '#1a3456' }}>Access Key Update</h4>
+
+            {passwordMsg && (
+              <div className="alert alert-info" style={{ fontSize: '13px' }}>
+                {passwordMsg}
+              </div>
+            )}
+
+            <div className="form-group mb-3">
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Current Password</label>
+              <input
+                type="password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="form-control"
+                style={{ borderRadius: '8px', fontSize: '14px' }}
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div className="form-group mb-3">
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>New Password</label>
+              <input
+                type="password"
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="form-control"
+                style={{ borderRadius: '8px', fontSize: '14px' }}
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div className="form-group mb-4">
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#555' }}>Confirm New Password</label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="form-control"
+                style={{ borderRadius: '8px', fontSize: '14px' }}
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loadingPassword}
+              className="btn btn-primary w-100 rt-btn rt-gradient pill text-uppercase"
+              style={{ border: 'none', fontWeight: 'bold' }}
+            >
+              {loadingPassword ? 'Confirming...' : 'Update Password'}
+            </button>
+          </form>
         </div>
       </div>
     </div>

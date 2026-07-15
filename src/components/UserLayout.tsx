@@ -16,124 +16,296 @@ export const UserLayout: React.FC = () => {
     navigate('/');
   };
 
+  const navLinks = [
+    { to: '/panel/dashboard', label: 'Dashboard', icon: '🏠' },
+    { to: '/panel/create', label: 'Create Test', icon: '✏️' },
+    { to: '/panel/reports', label: 'Reports & Scores', icon: '📊' },
+    { to: '/panel/settings', label: 'Settings', icon: '⚙️' },
+  ];
+
   return (
-    <div className={`wrapper ${sidebarCollapsed ? 'sidebar_minimize' : ''}`} style={{ background: '#f4f7f6', minHeight: '100vh' }}>
-      {/* Top Main Header */}
-      <div className="main-header" style={{ background: '#1a3456' }}>
-        {/* Logo Header */}
-        <div className="logo-header" style={{ background: '#1a3456' }}>
-          <Link to="/" className="big-logo">
-            <img src="/assets/images/logo/FamousDotsLogo.png" alt="CSQNA" className="logo-full" style={{ maxWidth: '170px' }} />
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f0f2f5', fontFamily: "'Segoe UI', sans-serif" }}>
+
+      {/* Sidebar */}
+      <aside style={{
+        width: sidebarCollapsed ? '72px' : '240px',
+        background: 'linear-gradient(180deg, #0d1b2e 0%, #1a3456 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        height: '100vh',
+        transition: 'width 0.3s ease',
+        zIndex: 100,
+        boxShadow: '3px 0 15px rgba(0,0,0,0.15)',
+        overflow: 'hidden'
+      }}>
+        {/* Logo Area */}
+        <div style={{
+          padding: sidebarCollapsed ? '20px 14px' : '20px 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+          minHeight: '72px'
+        }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+            <img
+              src="/marketing-assets/images/logo/Favicon.png"
+              alt="CSQNA"
+              style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '8px', flexShrink: 0 }}
+            />
+            {!sidebarCollapsed && (
+              <img
+                src="/marketing-assets/images/logo/FamousDotsLogoWhite.png"
+                alt="CSQNA"
+                style={{ height: '28px', objectFit: 'contain' }}
+              />
+            )}
           </Link>
-          <button className="navbar-toggler sidenav-toggler ml-auto" type="button" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-            <span className="navbar-toggler-icon">
-              <i className="fa fa-bars" style={{ color: '#fff' }}></i>
-            </span>
+        </div>
+
+        {/* Nav Links */}
+        <nav style={{ flex: 1, padding: '16px 0', overflowY: 'auto' }}>
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.to;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                title={link.label}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: sidebarCollapsed ? '14px 0' : '13px 24px',
+                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                  textDecoration: 'none',
+                  color: isActive ? '#fff' : 'rgba(255,255,255,0.6)',
+                  background: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
+                  borderLeft: isActive ? '3px solid #e21b5a' : '3px solid transparent',
+                  borderRadius: isActive ? '0 8px 8px 0' : '0',
+                  transition: 'all 0.2s ease',
+                  margin: '2px 0',
+                  fontSize: '14px',
+                  fontWeight: isActive ? '600' : '400',
+                }}
+              >
+                <span style={{ fontSize: '18px', flexShrink: 0 }}>{link.icon}</span>
+                {!sidebarCollapsed && <span>{link.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Sidebar Footer: Logout */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: '16px' }}>
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              padding: sidebarCollapsed ? '10px 0' : '10px 16px',
+              justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+              background: 'rgba(226, 27, 90, 0.15)',
+              border: '1px solid rgba(226, 27, 90, 0.3)',
+              borderRadius: '8px',
+              color: '#f87171',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <span style={{ fontSize: '16px' }}>🚪</span>
+            {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
+      </aside>
 
-        {/* Navbar Header */}
-        <nav className="navbar navbar-header navbar-expand-lg" style={{ background: '#1a3456' }}>
-          <div className="container-fluid">
-            <div className="navbar-minimize">
-              <button className="btn btn-minimize btn-rounded" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} style={{ background: 'transparent', border: 'none' }}>
-                <img src="/assets/images/dashboard/bar.png" width="16" alt="collapse" />
+      {/* Main Content Area */}
+      <div style={{
+        marginLeft: sidebarCollapsed ? '72px' : '240px',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'margin-left 0.3s ease',
+        minHeight: '100vh'
+      }}>
+
+        {/* Top Navbar */}
+        <header style={{
+          height: '64px',
+          background: '#fff',
+          borderBottom: '1px solid #e8ecf0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 28px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 99,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}>
+          {/* Left: Hamburger + Page Title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '6px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#64748b',
+                fontSize: '20px'
+              }}
+            >
+              ☰
+            </button>
+            <div style={{ color: '#1e293b', fontWeight: '600', fontSize: '16px' }}>
+              {navLinks.find(l => l.to === location.pathname)?.label || 'Dashboard'}
+            </div>
+          </div>
+
+          {/* Right: Support + Profile */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+            {/* Support Button */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => { setShowSupportDropdown(!showSupportDropdown); setShowProfileDropdown(false); }}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '38px',
+                  height: '38px',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Support"
+              >
+                🎧
               </button>
+              {showSupportDropdown && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '48px',
+                  background: '#fff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  minWidth: '230px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  zIndex: 200
+                }}>
+                  <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Support</p>
+                  <p style={{ margin: '0 0 6px', fontSize: '12px', color: '#64748b' }}>📞 +91 9137273947</p>
+                  <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#64748b' }}>✉️ support@csqna.com</p>
+                  <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+                  <a href="https://forms.gle/meNSC4ZkWWPPK6hC6" target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: '12px', color: '#e21b5a', fontWeight: '500', textDecoration: 'none' }}>
+                    🤝 Contribute
+                  </a>
+                </div>
+              )}
             </div>
 
-            <ul className="navbar-nav topbar-nav ml-md-auto align-items-center">
-              {/* Support Dropdown */}
-              <li className={`nav-item dropdown hidden-caret rt-pr-10 ${showSupportDropdown ? 'show' : ''}`} style={{ position: 'relative' }}>
-                <a className="dropdown-toggle" style={{ cursor: 'pointer' }} onClick={() => setShowSupportDropdown(!showSupportDropdown)}>
-                  <img src="/assets/images/dashboard/support_1.png" width="20" alt="support" className="img-circle" />
-                </a>
-                {showSupportDropdown && (
-                  <ul className="dropdown-menu dropdown-user animated fadeIn show" style={{ position: 'absolute', right: 0, top: '40px', background: '#fff', border: '1px solid #ccc', borderRadius: '5px', padding: '10px', minWidth: '220px' }}>
-                    <li>
-                      <p className="dropdown-item mb-0" style={{ fontSize: '13px', color: '#333' }}>Contact: +91 9137273947</p>
-                      <div className="dropdown-divider"></div>
-                      <p className="dropdown-item mb-0" style={{ fontSize: '13px', color: '#333' }}>Email: support@csqna.com</p>
-                      <div className="dropdown-divider"></div>
-                      <a className="dropdown-item" href="https://forms.gle/meNSC4ZkWWPPK6hC6" target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: '#007bff' }}>Contribute</a>
-                    </li>
-                  </ul>
-                )}
-              </li>
-
-              {/* Profile Dropdown */}
-              <li className={`nav-item dropdown hidden-caret ${showProfileDropdown ? 'show' : ''}`} style={{ position: 'relative' }}>
-                <a className="dropdown-toggle profile-pic" style={{ cursor: 'pointer' }} onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
-                  <img src="/assets/images/dashboard/profile.png" width="36" alt="profile" className="img-circle" style={{ borderRadius: '50%' }} />
-                </a>
-                {showProfileDropdown && (
-                  <ul className="dropdown-menu dropdown-user animated fadeIn show" style={{ position: 'absolute', right: 0, top: '45px', background: '#fff', border: '1px solid #ccc', borderRadius: '5px', padding: '15px', minWidth: '240px' }}>
-                    <li>
-                      <div className="user-box d-flex align-items-center gap-3">
-                        <div className="u-img">
-                          <img src="/assets/images/dashboard/profile.png" alt="profile" width="45" style={{ borderRadius: '50%' }} />
-                        </div>
-                        <div className="u-text">
-                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{user?.name}</h4>
-                          <p className="text-muted" style={{ margin: 0, fontSize: '12px' }}>{user?.email}</p>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="dropdown-divider"></div>
-                      <Link className="dropdown-item" to="/panel/settings" onClick={() => setShowProfileDropdown(false)} style={{ fontSize: '13px' }}>
-                        <i className="fa fa-cog mr-2"></i>Settings
-                      </Link>
-                      <div className="dropdown-divider"></div>
-                      <a className="dropdown-item" href="#" onClick={handleLogout} style={{ fontSize: '13px', color: '#c00' }}>
-                        <i className="fa fa-sign-out-alt mr-2"></i>Logout
-                      </a>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            </ul>
+            {/* Profile Button */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => { setShowProfileDropdown(!showProfileDropdown); setShowSupportDropdown(false); }}
+                style={{
+                  background: 'linear-gradient(135deg, #e21b5a, #f2722c)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '38px',
+                  height: '38px',
+                  cursor: 'pointer',
+                  color: '#fff',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Profile"
+              >
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </button>
+              {showProfileDropdown && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '50px',
+                  background: '#fff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  minWidth: '240px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  zIndex: 200
+                }}>
+                  {/* User Info */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                    <div style={{
+                      width: '42px', height: '42px', borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #e21b5a, #f2722c)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontWeight: '700', fontSize: '16px', flexShrink: 0
+                    }}>
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: '600', fontSize: '14px', color: '#1e293b' }}>{user?.name}</p>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{user?.email}</p>
+                    </div>
+                  </div>
+                  <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+                  <Link to="/panel/settings" onClick={() => setShowProfileDropdown(false)}
+                    style={{ display: 'block', padding: '8px 4px', fontSize: '13px', color: '#475569', textDecoration: 'none' }}>
+                    ⚙️ Settings
+                  </Link>
+                  <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+                  <button onClick={handleLogout}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '8px 4px', fontSize: '13px', color: '#e21b5a',
+                      background: 'none', border: 'none', cursor: 'pointer', fontWeight: '600'
+                    }}>
+                    🚪 Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </nav>
-      </div>
+        </header>
 
-      {/* Side Navigation Menu */}
-      <div id="sidebar-container" className="sidebar" style={{ background: '#fff', boxShadow: '2px 0 5px rgba(0,0,0,0.05)' }}>
-        <div className="sidebar-menu">
-          <ul className="list-group" style={{ padding: '20px 0' }}>
-            <li className="mb-2">
-              <Link to="/panel/dashboard" className={`d-flex w-100 justify-content-start align-items-center py-2 px-4 ${location.pathname === '/panel/dashboard' ? 'active' : ''}`} style={{ textDecoration: 'none', color: '#333' }}>
-                <img src="/assets/images/svg/dashboard.svg" width="20" className="mr-3" />
-                <span className="menu-collapsed" style={{ fontSize: '14px', fontWeight: '500' }}>Dashboard</span>
-              </Link>
-            </li>
-            <li className="mb-2">
-              <Link to="/panel/create" className={`d-flex w-100 justify-content-start align-items-center py-2 px-4 ${location.pathname === '/panel/create' ? 'active' : ''}`} style={{ textDecoration: 'none', color: '#333' }}>
-                <img src="/assets/images/svg/practice2.svg" width="20" className="mr-3" />
-                <span className="menu-collapsed" style={{ fontSize: '14px', fontWeight: '500' }}>Create Test</span>
-              </Link>
-            </li>
-            <li className="mb-2">
-              <Link to="/panel/reports" className={`d-flex w-100 justify-content-start align-items-center py-2 px-4 ${location.pathname === '/panel/reports' ? 'active' : ''}`} style={{ textDecoration: 'none', color: '#333' }}>
-                <img src="/assets/images/svg/reports-n-scores.svg" width="20" className="mr-3" />
-                <span className="menu-collapsed" style={{ fontSize: '14px', fontWeight: '500' }}>Reports & Scores</span>
-              </Link>
-            </li>
-            <li className="mb-2">
-              <Link to="/panel/settings" className={`d-flex w-100 justify-content-start align-items-center py-2 px-4 ${location.pathname === '/panel/settings' ? 'active' : ''}`} style={{ textDecoration: 'none', color: '#333' }}>
-                <img src="/assets/images/svg/settings.svg" width="20" className="mr-3" />
-                <span className="menu-collapsed" style={{ fontSize: '14px', fontWeight: '500' }}>Settings</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Main Content Render area */}
-      <div className="main-panel" style={{ paddingLeft: sidebarCollapsed ? '0' : '260px', paddingTop: '80px', transition: 'all 0.3s' }}>
-        <div className="content" style={{ padding: '30px' }}>
+        {/* Page Content */}
+        <main style={{ flex: 1, padding: '28px 32px', overflowY: 'auto' }}>
           <Outlet />
-        </div>
+        </main>
       </div>
+
+      {/* Overlay to close dropdowns when clicking outside */}
+      {(showProfileDropdown || showSupportDropdown) && (
+        <div
+          onClick={() => { setShowProfileDropdown(false); setShowSupportDropdown(false); }}
+          style={{ position: 'fixed', inset: 0, zIndex: 99 }}
+        />
+      )}
     </div>
   );
 };
