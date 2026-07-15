@@ -138,7 +138,6 @@ export const PracticeTest: React.FC = () => {
   // ─── SCORE REPORT ────────────────────────────────────────────────────
   if (reportData) {
     const totalQ = testData?.testQuestions?.length || 0;
-    const answeredCount = Object.keys(selectedAnswers).filter(k => selectedAnswers[k]?.length > 0).length;
     const scorePercent = reportData.score?.toFixed(1) || '0.0';
     const passed = parseFloat(scorePercent) >= 70;
 
