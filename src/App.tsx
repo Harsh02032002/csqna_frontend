@@ -10,7 +10,6 @@ import AdminLayout from './components/AdminLayout';
 import Ceh from './pages/certificates/Ceh';
 import Cisa from './pages/certificates/Cisa';
 import Cipp from './pages/certificates/Cipp';
-import Cissp from './pages/certificates/Cissp';
 import Dpdp from './pages/certificates/Dpdp';
 import Iso from './pages/certificates/Iso';
 import Aaia from './pages/certificates/Aaia';
@@ -46,7 +45,6 @@ const PublicLayout: React.FC = () => {
   const isCehSub = hostname.includes('ceh.csqna.com');
   const isCisaSub = hostname.includes('cisa.csqna.com');
   const isCippSub = hostname.includes('cipp.csqna.com');
-  const isCisspSub = hostname.includes('cissp.csqna.com');
   const isDpdpSub = hostname.includes('dpdp.csqna.com');
   const isIsoSub = hostname.includes('iso.csqna.com');
   const isAaiaSub = hostname.includes('aaia.csqna.com');
@@ -60,7 +58,6 @@ const PublicLayout: React.FC = () => {
             isCehSub ? <Ceh /> :
             isCisaSub ? <Cisa /> :
             isCippSub ? <Cipp /> :
-            isCisspSub ? <Cissp /> :
             isDpdpSub ? <Dpdp /> :
             isIsoSub ? <Iso /> :
             isAaiaSub ? <Aaia /> :
@@ -79,7 +76,6 @@ const PublicLayout: React.FC = () => {
           <Route path="/ceh" element={<Ceh />} />
           <Route path="/cisa" element={<Cisa />} />
           <Route path="/cipp" element={<Cipp />} />
-          <Route path="/cissp" element={<Cissp />} />
           <Route path="/dpdp" element={<Dpdp />} />
           <Route path="/iso" element={<Iso />} />
           <Route path="/aaia" element={<Aaia />} />

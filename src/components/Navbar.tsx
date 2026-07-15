@@ -12,7 +12,6 @@ export const Navbar: React.FC = () => {
     { name: 'CISA', path: '/cisa', sub: 'cisa' },
     { name: 'CEH', path: '/ceh', sub: 'ceh' },
     { name: 'CIPP', path: '/cipp', sub: 'cipp' },
-    { name: 'CISSP', path: '/cissp', sub: 'cissp' },
     { name: 'DPDP', path: '/dpdp', sub: 'dpdp' },
     { name: 'ISO 27001', path: '/iso', sub: 'iso' },
     { name: 'AAIA', path: '/aaia', sub: 'aaia' },
