@@ -39,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: u.email,
           username: u.username,
           role: u.role || 'user',
+          planDetails: u.planDetails,
         };
         localStorage.setItem('token', t);
         localStorage.setItem('userDetails', JSON.stringify(mappedUser));

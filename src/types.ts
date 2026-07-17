@@ -5,6 +5,9 @@ export interface UserDetails {
   username: string;
   role: 'admin' | 'user';
   createdAt?: string;
+  planDetails?: {
+    planName?: string;
+  };
 }
 
 export interface DomainTopic {
