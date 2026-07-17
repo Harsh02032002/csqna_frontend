@@ -171,7 +171,7 @@ section.faq-area, #accordion {
 
 /* Push all public pages below the fixed header */
 main.flex-grow {
-  padding-top: 60px !important;
+  padding-top: 80px !important;
 }
 
 /* Clean up cert-page specific padding */

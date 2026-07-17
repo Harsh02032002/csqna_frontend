@@ -37,6 +37,8 @@ import Settings from './pages/user/Settings';
 import AdminDashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
 import UploadQuestions from './pages/admin/UploadQuestions';
+import Questions from './pages/admin/Questions';
+import ContentManager from './pages/admin/ContentManager';
 
 const PublicLayout: React.FC = () => {
   const hostname = window.location.hostname;
@@ -137,7 +139,9 @@ export const App: React.FC = () => {
                   <Route element={<AdminLayout />}>
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="users" element={<Users />} />
+                    <Route path="questions" element={<Questions />} />
                     <Route path="upload" element={<UploadQuestions />} />
+                    <Route path="content" element={<ContentManager />} />
                     <Route path="*" element={<Navigate to="dashboard" />} />
                   </Route>
                 </Routes>

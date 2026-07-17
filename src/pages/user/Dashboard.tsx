@@ -2,282 +2,241 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
+const IconActive = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+const IconOngoing = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 3l14 9-14 9V3z"/>
+  </svg>
+);
+const IconCompleted = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+);
+const IconTotal = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+  </svg>
+);
+const IconArrow = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+  </svg>
+);
+
+interface StatCardProps {
+  label: string; value: number;
+  icon: React.ReactNode;
+  iconBg: string; iconColor: string;
+  borderColor: string;
+}
+const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, iconColor, borderColor }) => (
+  <div className="ud-stat-card" style={{
+    background: '#ffffff', borderRadius: '14px', padding: '20px',
+    display: 'flex', alignItems: 'center', gap: '16px',
+    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+    border: '1px solid #f0f2f8',
+    borderTop: `3px solid ${borderColor}`,
+    transition: 'all .22s ease',
+  }}>
+    <div style={{
+      width: '46px', height: '46px', borderRadius: '12px', flexShrink: 0,
+      background: iconBg, display: 'flex', alignItems: 'center',
+      justifyContent: 'center', color: iconColor,
+    }}>
+      {icon}
+    </div>
+    <div>
+      <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8', fontWeight: '600', letterSpacing: '0.7px', textTransform: 'uppercase' }}>
+        {label}
+      </p>
+      <p style={{ margin: '3px 0 0', fontSize: '26px', fontWeight: '700', color: '#1e293b', lineHeight: 1, letterSpacing: '-0.5px' }}>
+        {value}
+      </p>
+    </div>
+  </div>
+);
+
+const categories = [
+  'Data Protection and Privacy',
+  'Information Security Risk Management',
+  'Network Security',
+  'Encryption & Cryptography',
+  'Malware Protection',
+  'Identity and Access Management (IAM)',
+];
+
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
-    active: 0,
-    ongoing: 0,
-    completed: 0,
-    total: 0,
-  });
-  const chartRef = useRef<HTMLCanvasElement | null>(null);
+  const [stats, setStats] = useState({ active: 0, ongoing: 0, completed: 0, total: 0 });
+  const chartRef      = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<any>(null);
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const res = await api.get('/user/dashboard');
-        if (res.data && res.data.status && res.data.data) {
+        if (res.data?.status && res.data?.data) {
           const { testStats } = res.data.data;
           setStats({
-            active: testStats.active || 0,
-            ongoing: testStats.ongoing || 0,
+            active:    testStats.active    || 0,
+            ongoing:   testStats.ongoing   || 0,
             completed: testStats.completed || 0,
-            total: testStats.total || 0,
+            total:     testStats.total     || 0,
           });
+          const graph  = testStats.graph || [];
+          const pad7   = (arr: number[]) => { const t = [...arr]; while (t.length < 7) t.push(0); return t; };
+          const scores    = pad7(graph.map((i: any) => Number(i.score)));
+          const questions = pad7(graph.map((i: any) => Number(i.questions)));
 
-          // Extract graph data
-          const graph = testStats.graph || [];
-          const questionsList = graph.map((item: any) => Number(item.questions));
-          const scoresList = graph.map((item: any) => Number(item.score));
-
-          // Pad array to size 7
-          const padArrayToSizeSeven = (arr: number[]) => {
-            const temp = [...arr];
-            while (temp.length < 7) {
-              temp.push(0);
-            }
-            return temp;
-          };
-
-          const questions = padArrayToSizeSeven(questionsList);
-          const scores = padArrayToSizeSeven(scoresList);
-
-          // Draw Chart
           const win = window as any;
           if (chartRef.current && win.Chart) {
-            if (chartInstance.current) {
-              chartInstance.current.destroy();
-            }
-
+            chartInstance.current?.destroy();
             chartInstance.current = new win.Chart(chartRef.current, {
-              type: "radar",
+              type: 'radar',
               data: {
-                labels: [
-                  'Recent Test 1',
-                  'Recent Test 2',
-                  'Recent Test 3',
-                  'Recent Test 4',
-                  'Recent Test 5',
-                  'Recent Test 6',
-                  'Recent Test 7'
+                labels: ['Test 1','Test 2','Test 3','Test 4','Test 5','Test 6','Test 7'],
+                datasets: [
+                  {
+                    label: 'Correct Answers', data: scores, fill: true,
+                    backgroundColor: 'rgba(124,58,237,0.1)',
+                    borderColor: '#7c3aed',
+                    pointBackgroundColor: '#7c3aed', pointBorderColor: '#fff',
+                    borderWidth: 2,
+                  },
+                  {
+                    label: 'Questions Attempted', data: questions, fill: true,
+                    backgroundColor: 'rgba(99,102,241,0.08)',
+                    borderColor: '#6366f1',
+                    pointBackgroundColor: '#6366f1', pointBorderColor: '#fff',
+                    borderWidth: 2,
+                  },
                 ],
-                datasets: [{
-                  label: 'Correct Answered',
-                  data: scores,
-                  fill: true,
-                  backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                  borderColor: 'rgb(255, 99, 132)',
-                  pointBackgroundColor: 'rgb(255, 99, 132)',
-                  pointBorderColor: '#fff',
-                  pointHoverBackgroundColor: '#fff',
-                  pointHoverBorderColor: 'rgb(255, 99, 132)'
-                }, {
-                  label: 'Questions Attempted',
-                  data: questions,
-                  fill: true,
-                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                  borderColor: 'rgb(54, 162, 235)',
-                  pointBackgroundColor: 'rgb(54, 162, 235)',
-                  pointBorderColor: '#fff',
-                  pointHoverBackgroundColor: '#fff',
-                  pointHoverBorderColor: 'rgb(54, 162, 235)'
-                }]
               },
               options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                elements: {
-                  line: {
-                    borderWidth: 3
-                  }
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                  legend: { labels: { color: '#64748b', font: { family: 'Inter', size: 12 }, boxWidth: 12, padding: 16 } },
+                },
+                scales: {
+                  r: {
+                    grid: { color: '#e8eaf0' }, angleLines: { color: '#e8eaf0' },
+                    pointLabels: { color: '#64748b', font: { family: 'Inter', size: 11 } },
+                    ticks: { display: false },
+                  },
+                },
               },
             });
           }
         }
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      }
+      } catch (err) { console.error(err); }
     };
-
     fetchDashboard();
-
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
-    };
+    return () => { chartInstance.current?.destroy(); };
   }, []);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
   return (
-    <div className="container-fluid">
-      <div className="row column_title page_title">
-        <div className="col-md-12">
-          <h2 className="rt-pt-10 rt-pb-10" style={{ fontWeight: 'bold', fontSize: '24px', color: '#1a3456' }}>Dashboard</h2>
-        </div>
+    <div style={{ maxWidth: '1200px' }}>
+      <style>{`
+        .ud-stat-card:hover {
+          transform: translateY(-3px) !important;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.09) !important;
+        }
+        .ud-topic-row:hover {
+          background: #faf9ff !important;
+          border-color: #ede9fe !important;
+        }
+      `}</style>
+
+      {/* Welcome Banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 60%, #c4b5fd 100%)',
+        borderRadius: '16px', padding: '24px 28px', marginBottom: '24px',
+        position: 'relative', overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(124,58,237,0.25)',
+      }}>
+        <div style={{
+          position: 'absolute', top: '-40px', right: '-20px',
+          width: '180px', height: '180px', borderRadius: '50%',
+          background: 'rgba(255,255,255,0.12)', pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-50px', right: '100px',
+          width: '130px', height: '130px', borderRadius: '50%',
+          background: 'rgba(255,255,255,0.08)', pointerEvents: 'none',
+        }} />
+        <p style={{ margin: '0 0 4px', fontSize: '12px', color: 'rgba(255,255,255,0.75)', fontWeight: '600', letterSpacing: '0.8px' }}>
+          {greeting.toUpperCase()}
+        </p>
+        <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#fff', letterSpacing: '-0.2px' }}>
+          {user?.name} 👋
+        </h1>
+        <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>
+          Ready to practice? Your next certification is waiting.
+        </p>
       </div>
 
-      <div className="row align-items-center justify-content-center">
-        <div className="col-lg-12 col-sm-12">
-          <div>
-            <h1>
-              <span className="f-size-24 rt-semiblod rt-mb-13 d-block" style={{ fontSize: '20px', fontWeight: '600' }}>
-                Welcome, {user?.name}
-              </span>
-            </h1>
-          </div>
-        </div>
+      {/* Stat Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px', marginBottom: '24px' }}>
+        <StatCard label="Active Tests"    value={stats.active}    icon={<IconActive />}    iconBg="#fdf4ff" iconColor="#9333ea" borderColor="#a855f7" />
+        <StatCard label="Ongoing Tests"   value={stats.ongoing}   icon={<IconOngoing />}   iconBg="#eff6ff" iconColor="#3b82f6" borderColor="#60a5fa" />
+        <StatCard label="Completed Tests" value={stats.completed} icon={<IconCompleted />} iconBg="#f0fdf4" iconColor="#16a34a" borderColor="#4ade80" />
+        <StatCard label="Total Tests"     value={stats.total}     icon={<IconTotal />}     iconBg="#fff7ed" iconColor="#ea580c" borderColor="#fb923c" />
       </div>
 
-      <div className="rt-spacer-40 rt-spacer-xs-20"></div>
+      {/* Bottom Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }}>
 
-      <div className="row">
-        <div className="col-sm-6">
-          <h3 className="rt-semiblod rt-mb-15 text-lg-left text-md-left" style={{ fontSize: '18px', fontWeight: 'bold' }}>
-            Insights
-          </h3>
-        </div>
-      </div>
-
-      <div className="row">
-        {/* Active Tests */}
-        <div className="col-sm-6 col-md-3">
-          <div className="card card-stats card-primary card-round" style={{ borderRadius: '10px', overflow: 'hidden' }}>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-4">
-                  <div className="icon-big text-center">
-                    <img src="/assets/images/dashboard/activelisting.png" width="42" alt="active" />
-                  </div>
-                </div>
-                <div className="col-8 col-stats rt-pl-0">
-                  <div className="numbers">
-                    <p className="card-category" style={{ margin: 0, fontSize: '12px', color: '#777' }}>Active Tests</p>
-                    <h4 className="card-title" style={{ fontSize: '20px', fontWeight: 'bold' }}>{stats.active}</h4>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Chart */}
+        <div style={{
+          background: '#fff', borderRadius: '14px', padding: '22px',
+          boxShadow: '0 1px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f2f8',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>Performance</h2>
+            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '500' }}>Last 7 tests</span>
+          </div>
+          <div style={{ height: '320px', position: 'relative' }}>
+            <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
           </div>
         </div>
 
-        {/* Ongoing Tests */}
-        <div className="col-sm-6 col-md-3">
-          <div className="card card-stats card-notsale card-round" style={{ borderRadius: '10px', overflow: 'hidden' }}>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-4">
-                  <div className="icon-big text-center">
-                    <img src="/assets/images/dashboard/notforsale.png" width="42" alt="ongoing" />
-                  </div>
-                </div>
-                <div className="col-8 col-stats rt-pl-0">
-                  <div className="numbers">
-                    <p className="card-category" style={{ margin: 0, fontSize: '12px', color: '#777' }}>Ongoing Tests</p>
-                    <h4 className="card-title" style={{ fontSize: '20px', fontWeight: 'bold' }}>{stats.ongoing}</h4>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Trending */}
+        <div style={{
+          background: '#fff', borderRadius: '14px', padding: '22px',
+          boxShadow: '0 1px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f2f8',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>Trending Topics</h2>
           </div>
-        </div>
-
-        {/* Completed Tests */}
-        <div className="col-sm-6 col-md-3">
-          <div className="card card-stats card-pending card-round" style={{ borderRadius: '10px', overflow: 'hidden' }}>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-4">
-                  <div className="icon-big text-center">
-                    <img src="/assets/images/dashboard/pendinglisting.png" width="42" alt="completed" />
-                  </div>
-                </div>
-                <div className="col-8 col-stats rt-pl-0">
-                  <div className="numbers">
-                    <p className="card-category" style={{ margin: 0, fontSize: '12px', color: '#777' }}>Completed Tests</p>
-                    <h4 className="card-title" style={{ fontSize: '20px', fontWeight: 'bold' }}>{stats.completed}</h4>
-                  </div>
-                </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {categories.map((cat, i) => (
+              <div key={i} className="ud-topic-row" style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '10px 12px', borderRadius: '10px',
+                background: i === 0 ? '#faf9ff' : '#fafafa',
+                border: `1px solid ${i === 0 ? '#ede9fe' : '#f0f2f8'}`,
+                transition: 'all .18s ease', cursor: 'default',
+              }}>
+                <span style={{
+                  fontSize: '11px', fontWeight: '700', minWidth: '20px',
+                  color: i < 3 ? '#7c3aed' : '#cbd5e1',
+                }}>
+                  {i < 3 ? '★' : `${i+1}`}
+                </span>
+                <span style={{ fontSize: '12.5px', color: '#475569', flex: 1, lineHeight: 1.35 }}>{cat}</span>
+                <span style={{ color: '#cbd5e1', display: 'flex' }}><IconArrow /></span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Tests */}
-        <div className="col-sm-6 col-md-3">
-          <div className="card card-stats card-deleted card-round" style={{ borderRadius: '10px', overflow: 'hidden' }}>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-4">
-                  <div className="icon-big text-center">
-                    <img src="/assets/images/dashboard/deletedlisting.png" width="38" alt="total" />
-                  </div>
-                </div>
-                <div className="col-8 col-stats rt-pl-0">
-                  <div className="numbers">
-                    <p className="card-category" style={{ margin: 0, fontSize: '12px', color: '#777' }}>Total Tests</p>
-                    <h4 className="card-title" style={{ fontSize: '20px', fontWeight: 'bold' }}>{stats.total}</h4>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rt-spacer-40 rt-spacer-xs-20"></div>
-
-      <div className="row">
-        {/* Performance Chart */}
-        <div className="col-lg-8 performance">
-          <div className="white_card card_height_100 mb_30 p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-            <div className="white_card_header">
-              <div className="box_header m-0">
-                <div className="main-title">
-                  <h3 className="m-0" style={{ fontSize: '18px', fontWeight: 'bold', color: '#1a3456' }}>Performance</h3>
-                </div>
-              </div>
-            </div>
-            <div className="iframe" style={{ height: '380px', position: 'relative', marginTop: '20px' }}>
-              <canvas ref={chartRef} className="w-100" style={{ height: '100%' }}></canvas>
-            </div>
-          </div>
-        </div>
-
-        {/* Trending Categories */}
-        <div className="col-lg-4">
-          <div className="white_card card_height_100 mb_30 p-4" style={{ borderRadius: '15px', background: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', minHeight: '445px' }}>
-            <div className="white_card_header">
-              <div className="box_header m-0">
-                <div className="main-title">
-                  <h3 className="m-0" style={{ fontSize: '18px', fontWeight: 'bold', color: '#1a3456' }}>Trending Categories</h3>
-                </div>
-              </div>
-            </div>
-
-            <table className="table domain-table dashboardTable mt-3">
-              <tbody>
-                <tr>
-                  <td className="text-605" style={{ fontSize: '14px', padding: '12px 8px' }}>Data Protection and Privacy</td>
-                </tr>
-                <tr>
-                  <td className="text-605" style={{ fontSize: '14px', padding: '12px 8px' }}>Information Security Risk Management</td>
-                </tr>
-                <tr>
-                  <td className="text-605" style={{ fontSize: '14px', padding: '12px 8px' }}>Network Security</td>
-                </tr>
-                <tr>
-                  <td className="text-605" style={{ fontSize: '14px', padding: '12px 8px' }}>Encryption</td>
-                </tr>
-                <tr>
-                  <td className="text-605" style={{ fontSize: '14px', padding: '12px 8px' }}>Malware Protection</td>
-                </tr>
-                <tr>
-                  <td className="text-605" style={{ fontSize: '14px', padding: '12px 8px' }}>Identity and Access Management (IAM)</td>
-                </tr>
-              </tbody>
-            </table>
+            ))}
           </div>
         </div>
       </div>
