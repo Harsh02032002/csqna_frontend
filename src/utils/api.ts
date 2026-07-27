@@ -14,8 +14,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  const isBypass = config.url && (config.url.includes('/chat') || config.url.includes('/content'));
+
   // Encrypt request body for POST/PUT/PATCH if it is JSON data
-  if (config.method !== 'get' && config.data && !(config.data instanceof FormData)) {
+  if (!isBypass && config.method !== 'get' && config.data && !(config.data instanceof FormData)) {
     try {
       const plainTextData = typeof config.data === 'object' ? JSON.stringify(config.data) : config.data;
       config.data = encrypt(plainTextData);
@@ -32,6 +34,19 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 api.interceptors.response.use(
   (response: AxiosResponse) => {
+    const isBypass = response.config.url && (response.config.url.includes('/chat') || response.config.url.includes('/content'));
+
+    if (isBypass) {
+      if (response.data && typeof response.data === 'string') {
+        try {
+          response.data = JSON.parse(response.data);
+        } catch {
+          // Keep as string
+        }
+      }
+      return response;
+    }
+
     // Decrypt response if it is encrypted text string
     if (response.data && typeof response.data === 'string') {
       try {
@@ -53,7 +68,17 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.data && typeof error.response.data === 'string') {
+    const isBypass = error.config?.url && (error.config.url.includes('/chat') || error.config.url.includes('/content'));
+
+    if (isBypass) {
+      if (error.response?.data && typeof error.response.data === 'string') {
+        try {
+          error.response.data = JSON.parse(error.response.data);
+        } catch {
+          // Keep as string
+        }
+      }
+    } else if (error.response?.data && typeof error.response.data === 'string') {
       try {
         const decryptedError = decrypt(error.response.data);
         try {

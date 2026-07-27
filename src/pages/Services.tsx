@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useCMS } from '../utils/useCMS';
 
 export const Services: React.FC = () => {
+  const { t } = useCMS();
   useEffect(() => {
     const win = window as any;
     if (win.WOW) {
@@ -15,7 +17,7 @@ export const Services: React.FC = () => {
       <section className="rt-banner-area default-slider">
         <div className="rt-slider-active owl-carousel d-block">
           <div className="single-rt-banner rtbgprefix-full"
-               style={{ backgroundImage: "url('/marketing-assets/images/banner/FamousDots-Buy Domains-Banner.png')" }}>
+               style={{ backgroundImage: `url('${t('services_banner_image', '/marketing-assets/images/banner/FamousDots-Buy Domains-Banner.png')}')` }}>
             <div className="rt-inner-overlay move-1"
                  style={{ backgroundImage: "url(/marketing-assets/images/banner/slider-overlay.png)" }}>
             </div>
@@ -26,12 +28,11 @@ export const Services: React.FC = () => {
                     <h1>
                       <span className="f-size-40 f-size-xs-24 rt-strong rt-mb-13 d-block" data-duration="1s"
                             data-dealy="0.3s" data-animation="wow fadeInDown">
-                        We Boost Your Cybersecurity Skills.
+                        {t('services_hero_heading', 'We Boost Your Cybersecurity Skills.')}
                       </span>
                       <span className="d-block f-size-24 f-size-xs-18 rt-light1 rt-mb-10" data-duration="1s"
                             data-dealy="0.3s" data-animation="wow fadeInUp">
-                        Get to know your knowledge level and skill preparedness, identify the areas you need to focus on for skill building.
-                        Use the tests to practice for your upcoming exams, interviews, and presentations.
+                        {t('services_hero_sub', 'Get to know your knowledge level and skill preparedness, identify the areas you need to focus on for skill building.\nUse the tests to practice for your upcoming exams, interviews, and presentations.')}
                       </span>
                     </h1>
                     <Link to="/login" className="mt-4 rt-btn rt-gradient pill text-uppercase rt-Bshadow-1 rt-sm2">
@@ -58,7 +59,7 @@ export const Services: React.FC = () => {
         <div className="container">
           <div className="row">
             <div className="col-xl-12 col-lg-10 mx-auto text-center wow fade-in-bottom" data-wow-duration="1s">
-              <h2 className="rt-section-title">Skill Gap Analysis</h2>
+              <h2 className="rt-section-title">{t('services_skills_title', 'Skill Gap Analysis')}</h2>
             </div>
           </div>
           <div className="rt-spacer-60"></div>
@@ -71,10 +72,13 @@ export const Services: React.FC = () => {
                   <img src="/marketing-assets/images/all-img/dot-arrow.png" alt="box-icon" draggable="false" />
                 </span>
                 <div className="iconbox-content">
-                  <h5 className="f-size-28 rt-pt-25 f-size-lg-28 rt-normal rt-mb-25 text-center">Detailed Performance Insights</h5>
+                  <h5 className="f-size-28 rt-pt-25 f-size-lg-28 rt-normal rt-mb-25 text-center">
+                    {t('services_practice_title', 'Detailed Performance Insights')}
+                  </h5>
                   <ul className="stepsContent">
-                    <li>Identify strengths and weaknesses.</li>
-                    <li>Understand current skill levels.</li>
+                    {t('services_practice_desc', 'Identify strengths and weaknesses. / Understand current skill levels.').split(' / ').map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -87,10 +91,13 @@ export const Services: React.FC = () => {
                   <img src="/marketing-assets/images/all-img/dot-arrow.png" alt="box-icon" draggable="false" />
                 </span>
                 <div className="iconbox-content">
-                  <h5 className="f-size-28 rt-pt-25 f-size-lg-28 rt-normal rt-mb-25 text-center">Customized Study Recommendations</h5>
+                  <h5 className="f-size-28 rt-pt-25 f-size-lg-28 rt-normal rt-mb-25 text-center">
+                    {t('services_cert_title', 'Customized Study Recommendations')}
+                  </h5>
                   <ul className="stepsContent">
-                    <li>Focus on improvement areas.</li>
-                    <li>Tailored guidance for certifications.</li>
+                    {t('services_cert_desc', 'Focus on improvement areas. / Tailored guidance for certifications.').split(' / ').map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -103,10 +110,13 @@ export const Services: React.FC = () => {
                   <img src="/marketing-assets/images/all-img/dot-arrow.png" alt="box-icon" draggable="false" />
                 </span>
                 <div className="iconbox-content">
-                  <h5 className="f-size-28 rt-pt-25 f-size-lg-28 rt-normal rt-mb-25 text-center">Reporting and Progress Tracking</h5>
+                  <h5 className="f-size-28 rt-pt-25 f-size-lg-28 rt-normal rt-mb-25 text-center">
+                    {t('services_track_title', 'Reporting and Progress Tracking')}
+                  </h5>
                   <ul className="stepsContent">
-                    <li>Track growth over time.</li>
-                    <li>Receive instant feedback after tests.</li>
+                    {t('services_track_desc', 'Track growth over time. / Receive instant feedback after tests.').split(' / ').map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -121,7 +131,7 @@ export const Services: React.FC = () => {
         <div className="container">
           <div className="row">
             <div className="col-xl-9 col-lg-9 mx-auto text-center wow fade-in-bottom rt-mb-50" data-wow-duration="1s">
-              <h2 className="rt-section-title">Career Growth Training</h2>
+              <h2 className="rt-section-title">{t('services_career_title', 'Career Growth Training')}</h2>
             </div>
           </div>
 

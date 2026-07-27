@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useCMS } from '../utils/useCMS';
 
 export const Footer: React.FC = () => {
+  const { t } = useCMS();
   return (
     <section className="rt-site-footer deafult-footer has-callto-action">
       <div className="container-fluid rt-mb-0 rt-p-0">
@@ -39,7 +41,7 @@ export const Footer: React.FC = () => {
                 <a href="https://csqna.com" className="d-block rt-mb-25">
                   <img src="/marketing-assets/images/logo/FamousDotsLogo.png" alt="CSQNA" draggable="false" className="rt-footer-logo" />
                 </a>
-                <p className="f-size-18 rt-light2 f-size-lg-18">Test , Learn , Certify</p>
+                <p className="f-size-18 rt-light2 f-size-lg-18">{t('footer_tagline', 'Test , Learn , Certify')}</p>
                 <ul className="rt-list rt-mt-15">
                   <li className="d-inline-block">
                     <a href="https://www.youtube.com/@opensecurityalliance" target="_blank" rel="noopener noreferrer" className="rt-hw-40 text-center icon-white-secondary d-block rt-circle rt-mr-4">
@@ -118,9 +120,9 @@ export const Footer: React.FC = () => {
                 <div className="iconbox-content">
                   <h5 className="f-size-24 rt-normal rt-mb-10">Contact For Queries</h5>
                   <p className="f-size-18 line-height-34 rt-light3 rt-mb-0">
-                    <a href="mailto:support@csqna.com">support@csqna.com</a>
+                    <a href={`mailto:${t('footer_email', 'support@csqna.com')}`}>{t('footer_email', 'support@csqna.com')}</a>
                     &nbsp;&bull;&nbsp;
-                    <a href="tel:+919137273947">+91 91372 73947</a>
+                    <a href={`tel:${t('footer_phone', '+91 91372 73947').replace(/\s+/g, '')}`}>{t('footer_phone', '+91 91372 73947')}</a>
                   </p>
                 </div>
               </div>
@@ -136,7 +138,7 @@ export const Footer: React.FC = () => {
               <div className="disclaimer-box text-center rt-mb-20" style={{ fontSize: '13px', opacity: 0.8, color: '#94A3B8', maxWidth: '800px', margin: '0 auto 15px auto', lineHeight: '1.6' }}>
                 <strong>Disclaimer:</strong> CSQNA is an independent educational provider of practice tests and study materials. CISA, CISSP, CIPP, CEH, and other certification names/registered trademarks are properties of their respective owners (such as ISACA, ISC², IAPP, EC-Council). CSQNA is not affiliated with, authorized, sponsored, or endorsed by any of these certification owners.
               </div>
-              Copyright © 2026-2030. All Rights Reserved By <a href="https://csqna.com" className="primary-color">CSQNA</a>
+              {t('footer_copyright', 'Copyright © 2026-2030. All Rights Reserved By')} <a href="https://csqna.com" className="primary-color">CSQNA</a>
             </div>
           </div>
         </div>
