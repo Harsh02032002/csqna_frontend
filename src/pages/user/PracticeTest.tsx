@@ -371,11 +371,10 @@ export const PracticeTest: React.FC = () => {
       </div>
 
       {/* ── Question Card ── */}
-      <div style={{
+      <div key={currentIdx} style={{
         background: '#fff', borderRadius: '20px', padding: '32px 36px',
         boxShadow: '0 4px 24px rgba(0,0,0,0.07)', marginBottom: '16px',
         border: '1px solid #f0f2f8', animation: 'ptSlide .2s ease',
-        key: currentIdx,
       }}>
         {/* Badges */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>

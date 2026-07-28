@@ -153,7 +153,7 @@ export const Reports: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((t, idx) => (
+                {filtered.map((t) => (
                   <tr key={t._id} className="rp-row" style={{ borderBottom: '1px solid #f8fafc' }}>
                     <td style={{ padding: '16px 20px' }}>
                       <p style={{ margin: 0, fontSize: '13.5px', fontWeight: '700', color: '#0f172a' }}>{t.testname}</p>
