@@ -45,6 +45,7 @@ export const PracticeTest: React.FC = () => {
   const [testData, setTestData]             = useState<any>(null);
   const [currentIdx, setCurrentIdx]         = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
+  const [answerStatuses, setAnswerStatuses] = useState<Record<string, 'Answered' | 'Partial Answer' | 'Unanswered'>>({});
   const [remainingTime, setRemainingTime]   = useState(0);
   const [loading, setLoading]               = useState(true);
   const [submitting, setSubmitting]         = useState(false);
@@ -61,11 +62,15 @@ export const PracticeTest: React.FC = () => {
         if (res.data?.status && res.data?.data) {
           setTestData(res.data.data);
           setRemainingTime((res.data.data.duration || 40) * 60);
-          const init: Record<string, string[]> = {};
+          const initAnswers: Record<string, string[]> = {};
+          const initStatuses: Record<string, 'Answered' | 'Partial Answer' | 'Unanswered'> = {};
           res.data.data.testQuestions?.forEach((q: any) => {
-            if (q.userAnswer) init[q._id] = Array.isArray(q.userAnswer) ? q.userAnswer : [q.userAnswer];
+            const ans = Array.isArray(q.userAnswer) ? q.userAnswer : q.userAnswer ? [q.userAnswer] : [];
+            if (ans.length > 0) initAnswers[q._id] = ans;
+            initStatuses[q._id] = q.answerStatus || (ans.length > 0 ? 'Answered' : 'Unanswered');
           });
-          setSelectedAnswers(init);
+          setSelectedAnswers(initAnswers);
+          setAnswerStatuses(initStatuses);
         } else {
           setErrorMessage('Failed to start test session.');
         }
@@ -99,10 +104,61 @@ export const PracticeTest: React.FC = () => {
       cur = [optText];
     }
     setSelectedAnswers({ ...selectedAnswers, [qId]: cur });
+
+    const currentStatus = answerStatuses[qId] || 'Unanswered';
+    const newStatus = currentStatus === 'Partial Answer' ? 'Partial Answer' : (cur.length > 0 ? 'Answered' : 'Unanswered');
+    setAnswerStatuses(prev => ({ ...prev, [qId]: newStatus }));
+
     try {
-      await api.post('/user/practice/saveresponse', { testId, questionId: qId, answer: cur });
+      await api.post('/user/practice/saveresponse', { testId, questionId: qId, answer: cur, answerStatus: newStatus });
     } catch { /* silent */ }
   };
+
+  const handlePartialAnswer = async () => {
+    if (!testData?.testQuestions?.[currentIdx]) return;
+    const cq = testData.testQuestions[currentIdx];
+    const qId = cq._id;
+    const curAns = selectedAnswers[qId] || [];
+
+    const newStatus = 'Partial Answer';
+    setAnswerStatuses(prev => ({ ...prev, [qId]: newStatus }));
+
+    try {
+      await api.post('/user/practice/saveresponse', { testId, questionId: qId, answer: curAns, answerStatus: newStatus });
+    } catch { /* silent */ }
+
+    if (currentIdx < (testData.testQuestions.length - 1)) {
+      setCurrentIdx(currentIdx + 1);
+    }
+  };
+
+  const handleNext = async () => {
+    if (!testData?.testQuestions?.[currentIdx]) return;
+    const cq = testData.testQuestions[currentIdx];
+    const qId = cq._id;
+    const curAns = selectedAnswers[qId] || [];
+    const currentStatus = answerStatuses[qId] || 'Unanswered';
+    const totalQ = testData.testQuestions.length;
+
+    let newStatus = currentStatus;
+    if (curAns.length > 0) {
+      newStatus = 'Answered';
+    } else if (currentStatus !== 'Partial Answer') {
+      newStatus = 'Unanswered';
+    }
+
+    if (newStatus !== currentStatus) {
+      setAnswerStatuses(prev => ({ ...prev, [qId]: newStatus }));
+      try {
+        await api.post('/user/practice/saveresponse', { testId, questionId: qId, answer: curAns, answerStatus: newStatus });
+      } catch { /* silent */ }
+    }
+
+    if (currentIdx < totalQ - 1) {
+      setCurrentIdx(currentIdx + 1);
+    }
+  };
+
 
   const handleSubmitTest = async () => {
     setSubmitting(true);
@@ -299,12 +355,15 @@ export const PracticeTest: React.FC = () => {
   const cq       = testData?.testQuestions?.[currentIdx];
   if (!cq) return null;
 
+  const cqStatus      = answerStatuses[cq._id] || 'Unanswered';
   const isMulti       = cq.questionType === 'MSQ';
   const userAns       = selectedAnswers[cq._id] || [];
   const opts          = getOptionsArray(cq.options);
   const totalQ        = testData.testQuestions.length;
-  const answeredCount = Object.keys(selectedAnswers).filter(k => selectedAnswers[k]?.length > 0).length;
-  const progress      = Math.round((answeredCount / totalQ) * 100);
+  const answeredCount = Object.values(answerStatuses).filter(s => s === 'Answered').length;
+  const partialCount  = Object.values(answerStatuses).filter(s => s === 'Partial Answer').length;
+  const unansweredCount = Math.max(0, totalQ - answeredCount - partialCount);
+  const progress      = Math.round(((answeredCount + partialCount) / totalQ) * 100);
   const timerUrgent   = remainingTime < 300;
   const timerWarn     = remainingTime < 600;
   const timerColor    = timerUrgent ? '#ef4444' : timerWarn ? '#f59e0b' : '#10b981';
@@ -312,7 +371,7 @@ export const PracticeTest: React.FC = () => {
   const timerBorder   = timerUrgent ? '#fecaca' : timerWarn ? '#fde68a' : '#bbf7d0';
 
   return (
-    <div style={{ maxWidth: '860px', margin: '0 auto', fontFamily: "'Inter','Segoe UI',sans-serif" }}>
+    <div style={{ maxWidth: '1180px', margin: '0 auto', fontFamily: "'Inter','Segoe UI',sans-serif" }}>
       <style>{`
         @keyframes ptSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
         @keyframes ptSlide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
@@ -322,7 +381,19 @@ export const PracticeTest: React.FC = () => {
         .pt-nav-btn    { transition: all .15s ease !important; }
         .pt-nav-btn:hover { transform: translateY(-2px) !important; }
         .pt-q-dot      { transition: all .15s ease; cursor: pointer; }
-        .pt-q-dot:hover{ transform: scale(1.15); }
+        .pt-q-dot:hover{ transform: scale(1.12); }
+
+        .pt-layout-grid {
+          display: grid;
+          grid-template-columns: 1fr 310px;
+          gap: 20px;
+          align-items: start;
+        }
+        @media (max-width: 920px) {
+          .pt-layout-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       {/* ── Top Status Bar ── */}
@@ -340,6 +411,7 @@ export const PracticeTest: React.FC = () => {
             <p style={{ margin: '1px 0 0', fontSize: '11px', color: '#94a3b8', fontWeight: '500' }}>
               Question <strong style={{ color: '#7c3aed' }}>{currentIdx + 1}</strong> of {totalQ} &nbsp;·&nbsp;
               <span style={{ color: '#10b981', fontWeight: '600' }}>{answeredCount} answered</span>
+              {partialCount > 0 && <span style={{ color: '#d97706', fontWeight: '600', marginLeft: '6px' }}>· {partialCount} partial</span>}
             </p>
           </div>
         </div>
@@ -357,8 +429,8 @@ export const PracticeTest: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Progress ── */}
-      <div style={{ marginBottom: '16px' }}>
+      {/* ── Progress Bar ── */}
+      <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
           <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>PROGRESS</span>
           <span style={{ fontSize: '11px', color: '#7c3aed', fontWeight: '700' }}>{progress}%</span>
@@ -370,140 +442,189 @@ export const PracticeTest: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Question Card ── */}
-      <div key={currentIdx} style={{
-        background: '#fff', borderRadius: '20px', padding: '32px 36px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.07)', marginBottom: '16px',
-        border: '1px solid #f0f2f8', animation: 'ptSlide .2s ease',
-      }}>
-        {/* Badges */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '1px', padding: '4px 10px', borderRadius: '20px', background: '#ede9fe', color: '#7c3aed' }}>
-            {cq.questionType || 'MCQ'}
-          </span>
-          {cq.difficultyLevel && (
-            <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '1px', padding: '4px 10px', borderRadius: '20px',
-              background: cq.difficultyLevel === 'Hard' ? '#fff1f2' : cq.difficultyLevel === 'Easy' ? '#f0fdf4' : '#fffbeb',
-              color: cq.difficultyLevel === 'Hard' ? '#e11d48' : cq.difficultyLevel === 'Easy' ? '#16a34a' : '#d97706',
-            }}>
-              {cq.difficultyLevel}
-            </span>
-          )}
-          {isMulti && (
-            <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', fontWeight: '500' }}>
-              ✦ Select all that apply
-            </span>
-          )}
-          <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#cbd5e1', fontWeight: '600' }}>
-            {currentIdx + 1} / {totalQ}
-          </span>
-        </div>
-
-        {/* Question text */}
-        <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', lineHeight: '1.75', marginBottom: '28px', letterSpacing: '-0.1px' }}>
-          {cq.question}
-        </h3>
-
-        {/* Options */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {opts.map((opt, i) => {
-            const sel = userAns.includes(opt.text);
-            return (
-              <button key={opt.key} type="button" onClick={() => handleOptionSelect(cq._id, opt.text, isMulti)}
-                className="pt-option-btn"
-                style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '14px',
-                  padding: '15px 18px',
-                  border: `2px solid ${sel ? '#7c3aed' : '#e8edf3'}`,
-                  borderRadius: '14px',
-                  background: sel ? 'linear-gradient(135deg,#faf8ff,#f3f0ff)' : '#fafbfc',
-                  cursor: 'pointer', textAlign: 'left', outline: 'none', width: '100%',
-                  boxShadow: sel ? '0 2px 12px rgba(124,58,237,0.12)' : 'none',
-                }}>
-                <span style={{
-                  width: '30px', height: '30px', borderRadius: sel ? '10px' : '50%', flexShrink: 0,
-                  background: sel ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : '#f1f5f9',
-                  color: sel ? '#fff' : '#94a3b8',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '12px', fontWeight: '800', transition: 'all .15s ease',
-                }}>
-                  {sel ? <IconCheck /> : LABELS[i] || i + 1}
-                </span>
-                <span style={{ fontSize: '14px', color: sel ? '#4c1d95' : '#374151', lineHeight: '1.65', fontWeight: sel ? '600' : '400', flex: 1 }}>
-                  {opt.text}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Navigation ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <button type="button" disabled={currentIdx === 0} onClick={() => setCurrentIdx(currentIdx - 1)}
-          className="pt-nav-btn"
-          style={{
-            padding: '12px 22px', borderRadius: '12px', border: '2px solid #e2e8f0',
-            background: '#fff', color: '#64748b', fontWeight: '600', fontSize: '14px',
-            cursor: currentIdx === 0 ? 'not-allowed' : 'pointer', opacity: currentIdx === 0 ? 0.45 : 1,
-            display: 'flex', alignItems: 'center', gap: '6px',
+      {/* ── Main Layout: Question (Left) & Question Navigator (Right) ── */}
+      <div className="pt-layout-grid">
+        {/* LEFT COLUMN: Question & Buttons */}
+        <div>
+          {/* Question Card */}
+          <div key={currentIdx} style={{
+            background: '#fff', borderRadius: '20px', padding: '32px 36px',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.07)', marginBottom: '16px',
+            border: '1px solid #f0f2f8', animation: 'ptSlide .2s ease',
           }}>
-          ← Prev
-        </button>
-
-        <div style={{ display: 'flex', gap: '10px' }}>
-          {currentIdx !== totalQ - 1 && (
-            <button type="button" onClick={() => setShowConfirm(true)} className="pt-nav-btn"
-              style={{ padding: '12px 18px', borderRadius: '12px', border: '2px solid #fca5a5', background: '#fff5f5', color: '#ef4444', fontWeight: '600', fontSize: '13px', cursor: 'pointer' }}>
-              Submit Early
-            </button>
-          )}
-          {currentIdx === totalQ - 1 ? (
-            <button type="button" onClick={() => setShowConfirm(true)} className="pt-nav-btn"
-              style={{ padding: '12px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(16,185,129,0.35)' }}>
-              ✓ Submit Test
-            </button>
-          ) : (
-            <button type="button" onClick={() => setCurrentIdx(currentIdx + 1)} className="pt-nav-btn"
-              style={{ padding: '12px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              Next <IconArrow />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Question Nav Dots ── */}
-      <div style={{ background: '#fff', borderRadius: '16px', padding: '16px 18px', border: '1px solid #f0f2f8', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-        <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px' }}>QUESTION NAVIGATOR</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-          {testData.testQuestions.map((_: any, idx: number) => {
-            const answered = selectedAnswers[testData.testQuestions[idx]._id]?.length > 0;
-            const isCur    = currentIdx === idx;
-            return (
-              <button key={idx} className="pt-q-dot" onClick={() => setCurrentIdx(idx)}
-                style={{
-                  width: '32px', height: '32px', borderRadius: '8px', border: 'none',
-                  background: isCur ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : answered ? '#ede9fe' : '#f1f5f9',
-                  color: isCur ? '#fff' : answered ? '#7c3aed' : '#94a3b8',
-                  fontSize: '11px', fontWeight: '700',
-                  boxShadow: isCur ? '0 2px 8px rgba(124,58,237,0.4)' : 'none',
+            {/* Badges */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>
+              {cqStatus === 'Partial Answer' && (
+                <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '0.5px', padding: '4px 10px', borderRadius: '20px', background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a' }}>
+                  🟡 Partial Answer
+                </span>
+              )}
+              {cq.difficultyLevel && (
+                <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '1px', padding: '4px 10px', borderRadius: '20px',
+                  background: cq.difficultyLevel === 'Hard' ? '#fff1f2' : cq.difficultyLevel === 'Easy' ? '#f0fdf4' : '#fffbeb',
+                  color: cq.difficultyLevel === 'Hard' ? '#e11d48' : cq.difficultyLevel === 'Easy' ? '#16a34a' : '#d97706',
                 }}>
-                {idx + 1}
-              </button>
-            );
-          })}
-        </div>
-        <div style={{ display: 'flex', gap: '16px', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
-          {[
-            { color: 'linear-gradient(135deg,#7c3aed,#a78bfa)', label: 'Current' },
-            { color: '#ede9fe', label: 'Answered', textColor: '#7c3aed' },
-            { color: '#f1f5f9', label: 'Unanswered' },
-          ].map((leg, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '14px', height: '14px', borderRadius: '4px', background: leg.color }} />
-              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '500' }}>{leg.label}</span>
+                  {cq.difficultyLevel}
+                </span>
+              )}
+              {isMulti && (
+                <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', fontWeight: '500' }}>
+                  ✦ Select all that apply
+                </span>
+              )}
+              <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#cbd5e1', fontWeight: '600' }}>
+                {currentIdx + 1} / {totalQ}
+              </span>
             </div>
-          ))}
+
+            {/* Question text */}
+            <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', lineHeight: '1.75', marginBottom: '28px', letterSpacing: '-0.1px' }}>
+              {cq.question}
+            </h3>
+
+            {/* Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {opts.map((opt, i) => {
+                const sel = userAns.includes(opt.text);
+                return (
+                  <button key={opt.key} type="button" onClick={() => handleOptionSelect(cq._id, opt.text, isMulti)}
+                    className="pt-option-btn"
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '14px',
+                      padding: '15px 18px',
+                      border: `2px solid ${sel ? '#7c3aed' : '#e8edf3'}`,
+                      borderRadius: '14px',
+                      background: sel ? 'linear-gradient(135deg,#faf8ff,#f3f0ff)' : '#fafbfc',
+                      cursor: 'pointer', textAlign: 'left', outline: 'none', width: '100%',
+                      boxShadow: sel ? '0 2px 12px rgba(124,58,237,0.12)' : 'none',
+                    }}>
+                    <span style={{
+                      width: '30px', height: '30px', borderRadius: sel ? '10px' : '50%', flexShrink: 0,
+                      background: sel ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : '#f1f5f9',
+                      color: sel ? '#fff' : '#94a3b8',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '12px', fontWeight: '800', transition: 'all .15s ease',
+                    }}>
+                      {sel ? <IconCheck /> : LABELS[i] || i + 1}
+                    </span>
+                    <span style={{ fontSize: '14px', color: sel ? '#4c1d95' : '#374151', lineHeight: '1.65', fontWeight: sel ? '600' : '400', flex: 1 }}>
+                      {opt.text}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button type="button" disabled={currentIdx === 0} onClick={() => setCurrentIdx(currentIdx - 1)}
+              className="pt-nav-btn"
+              style={{
+                padding: '12px 22px', borderRadius: '12px', border: '2px solid #e2e8f0',
+                background: '#fff', color: '#64748b', fontWeight: '600', fontSize: '14px',
+                cursor: currentIdx === 0 ? 'not-allowed' : 'pointer', opacity: currentIdx === 0 ? 0.45 : 1,
+                display: 'flex', alignItems: 'center', gap: '6px',
+              }}>
+              ← Prev
+            </button>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="button" onClick={handlePartialAnswer} className="pt-nav-btn"
+                style={{
+                  padding: '12px 18px', borderRadius: '12px',
+                  border: `2px solid ${cqStatus === 'Partial Answer' ? '#f59e0b' : '#fde68a'}`,
+                  background: cqStatus === 'Partial Answer' ? '#fef3c7' : '#fffbeb',
+                  color: '#d97706', fontWeight: '700', fontSize: '13px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  boxShadow: cqStatus === 'Partial Answer' ? '0 2px 8px rgba(245,158,11,0.25)' : 'none'
+                }}>
+                🟡 Partial Answer
+              </button>
+
+              {currentIdx !== totalQ - 1 && (
+                <button type="button" onClick={() => setShowConfirm(true)} className="pt-nav-btn"
+                  style={{ padding: '12px 18px', borderRadius: '12px', border: '2px solid #fca5a5', background: '#fff5f5', color: '#ef4444', fontWeight: '600', fontSize: '13px', cursor: 'pointer' }}>
+                  Submit
+                </button>
+              )}
+              {currentIdx === totalQ - 1 ? (
+                <button type="button" onClick={() => setShowConfirm(true)} className="pt-nav-btn"
+                  style={{ padding: '12px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(16,185,129,0.35)' }}>
+                  ✓ Submit Test
+                </button>
+              ) : (
+                <button type="button" onClick={handleNext} className="pt-nav-btn"
+                  style={{ padding: '12px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  Next <IconArrow />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Question Navigator Sidebar */}
+        <div style={{ position: 'sticky', top: '80px' }}>
+          <div style={{ background: '#fff', borderRadius: '20px', padding: '20px', border: '1px solid #f0f2f8', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px' }}>QUESTION NAVIGATOR</p>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#7c3aed', background: '#ede9fe', padding: '3px 10px', borderRadius: '12px' }}>
+                {answeredCount + partialCount}/{totalQ}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', maxHeight: '360px', overflowY: 'auto', paddingRight: '2px' }}>
+              {testData.testQuestions.map((q: any, idx: number) => {
+                const status = answerStatuses[q._id] || 'Unanswered';
+                const isCur  = currentIdx === idx;
+
+                let bg = '#f1f5f9';
+                let color = '#94a3b8';
+                let border = 'none';
+
+                if (isCur) {
+                  bg = 'linear-gradient(135deg,#7c3aed,#a78bfa)';
+                  color = '#fff';
+                  if (status === 'Partial Answer') {
+                    border = '2px solid #f59e0b';
+                  }
+                } else if (status === 'Partial Answer') {
+                  bg = '#fffbeb';
+                  color = '#d97706';
+                  border = '1px solid #fde68a';
+                } else if (status === 'Answered') {
+                  bg = '#ede9fe';
+                  color = '#7c3aed';
+                }
+
+                return (
+                  <button key={idx} className="pt-q-dot" onClick={() => setCurrentIdx(idx)}
+                    style={{
+                      height: '36px', borderRadius: '10px', border,
+                      background: bg, color,
+                      fontSize: '12px', fontWeight: '700',
+                      boxShadow: isCur ? '0 2px 8px rgba(124,58,237,0.4)' : 'none',
+                    }}>
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
+              {[
+                { color: 'linear-gradient(135deg,#7c3aed,#a78bfa)', label: 'Current Question' },
+                { color: '#ede9fe', label: 'Answered' },
+                { color: '#fffbeb', label: 'Partial Answer', border: '1px solid #fde68a' },
+                { color: '#f1f5f9', label: 'Unanswered' },
+              ].map((leg, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '4px', background: leg.color, border: leg.border || 'none', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>{leg.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -515,12 +636,17 @@ export const PracticeTest: React.FC = () => {
               📋
             </div>
             <h4 style={{ fontWeight: '800', color: '#0f172a', marginBottom: '8px', fontSize: '18px' }}>Submit Assessment?</h4>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '6px', lineHeight: 1.6 }}>
+            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '10px', lineHeight: 1.6 }}>
               You've answered <strong style={{ color: '#7c3aed' }}>{answeredCount}</strong> of <strong>{totalQ}</strong> questions.
             </p>
-            {answeredCount < totalQ && (
-              <p style={{ color: '#f59e0b', fontSize: '13px', marginBottom: '24px', background: '#fffbeb', padding: '8px 14px', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                ⚠️ {totalQ - answeredCount} questions are unanswered
+            {partialCount > 0 && (
+              <p style={{ color: '#d97706', fontSize: '13px', marginBottom: '10px', background: '#fffbeb', padding: '8px 14px', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                🟡 {partialCount} question(s) marked as Partial Answer
+              </p>
+            )}
+            {unansweredCount > 0 && (
+              <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '20px', background: '#fff5f5', padding: '8px 14px', borderRadius: '8px', border: '1px solid #fca5a5' }}>
+                ⚠️ {unansweredCount} question(s) are unanswered
               </p>
             )}
             <p style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '24px' }}>Once submitted, your answers cannot be changed.</p>
@@ -539,6 +665,7 @@ export const PracticeTest: React.FC = () => {
       )}
     </div>
   );
+
 };
 
 export default PracticeTest;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 
 const IconUsers = () => (
@@ -61,6 +62,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, iconCol
 );
 
 export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ totalUsers: 0, totalQuestions: 0, totalTestsTaken: 0, databaseSize: '0 MB' });
   const [loading, setLoading] = useState(true);
 
@@ -88,72 +90,54 @@ export const Dashboard: React.FC = () => {
     <div style={{ maxWidth: '1100px' }}>
       <style>{`
         .ad-stat-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.09) !important; }
-        @keyframes adDotPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .ad-action-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important; }
       `}</style>
 
       {/* Page header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1e293b', letterSpacing: '-0.2px' }}>
-          Operator Control Room
+          Admin Dashboard
         </h1>
         <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#94a3b8' }}>
-          CSQNA platform overview and system health
+          CSQNA platform statistics and management overview
         </p>
       </div>
 
       {/* Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px', marginBottom: '24px' }}>
-        <StatCard label="Registered Clients" value={stats.totalUsers}                    icon={<IconUsers />}  iconBg="#fdf4ff" iconColor="#9333ea" borderColor="#a855f7" loading={loading} />
-        <StatCard label="System Questions"   value={stats.totalQuestions.toLocaleString()} icon={<IconDB />}     iconBg="#eff6ff" iconColor="#3b82f6" borderColor="#60a5fa" loading={loading} />
-        <StatCard label="Simulated Tests"    value={stats.totalTestsTaken.toLocaleString()} icon={<IconFile />}   iconBg="#f0fdf4" iconColor="#16a34a" borderColor="#4ade80" loading={loading} />
-        <StatCard label="Database Storage"   value={stats.databaseSize}                  icon={<IconServer />} iconBg="#fff7ed" iconColor="#ea580c" borderColor="#fb923c" loading={loading} />
+        <StatCard label="Registered Users"  value={stats.totalUsers}                    icon={<IconUsers />}  iconBg="#fdf4ff" iconColor="#9333ea" borderColor="#a855f7" loading={loading} />
+        <StatCard label="Total Questions"   value={stats.totalQuestions.toLocaleString()} icon={<IconDB />}     iconBg="#eff6ff" iconColor="#3b82f6" borderColor="#60a5fa" loading={loading} />
+        <StatCard label="Total Tests Taken" value={stats.totalTestsTaken.toLocaleString()} icon={<IconFile />}   iconBg="#f0fdf4" iconColor="#16a34a" borderColor="#4ade80" loading={loading} />
+        <StatCard label="Database Storage"  value={stats.databaseSize}                  icon={<IconServer />} iconBg="#fff7ed" iconColor="#ea580c" borderColor="#fb923c" loading={loading} />
       </div>
 
-      {/* System Status */}
+      {/* Quick Admin Actions */}
       <div style={{
-        background: '#fff', borderRadius: '14px', padding: '22px',
+        background: '#fff', borderRadius: '16px', padding: '24px',
         boxShadow: '0 1px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f2f8',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
-          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>
-            System Operations Status
-          </h2>
-          <span style={{
-            marginLeft: 'auto', fontSize: '10px', fontWeight: '700', color: '#16a34a',
-            background: '#f0fdf4', padding: '3px 10px', borderRadius: '20px',
-            border: '1px solid #bbf7d0', letterSpacing: '0.7px',
-          }}>ALL SYSTEMS OPERATIONAL</span>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+        <h2 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+          Quick Admin Actions
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
           {[
-            { label: 'AUTH GATEWAY',        status: 'ONLINE',        color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
-            { label: 'DATABASE CONNECTION', status: 'CONNECTED',     color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
-            { label: 'GROQ INFERENCE NODE', status: 'ACTIVE (5003)', color: '#7c3aed', bg: '#faf9ff', border: '#ede9fe' },
-          ].map(item => (
-            <div key={item.label} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '12px 14px', background: item.bg,
-              borderRadius: '10px', border: `1px solid ${item.border}`,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '7px', height: '7px', borderRadius: '50%', background: item.color,
-                  boxShadow: `0 0 0 3px ${item.border}`,
-                  animation: 'adDotPulse 2s ease-in-out infinite',
-                }} />
-                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', letterSpacing: '0.8px' }}>
-                  {item.label}
-                </span>
-              </div>
-              <span style={{
-                fontSize: '11px', fontWeight: '700', color: item.color,
-                background: '#fff', padding: '2px 8px', borderRadius: '20px',
-                border: `1px solid ${item.border}`, letterSpacing: '0.5px',
+            { title: 'Questions Database', desc: 'Add, view & manage test questions', path: '/admin/questions', icon: '📚', bg: '#f5f3ff', border: '#ddd6fe' },
+            { title: 'Upload Bulk Excel', desc: 'Import CSV or Excel question sets', path: '/admin/upload-excel', icon: '📥', bg: '#eff6ff', border: '#bfdbfe' },
+            { title: 'Manage Clients', desc: 'View registered users & candidates', path: '/admin/users', icon: '👥', bg: '#ecfdf5', border: '#a7f3d0' },
+            { title: 'Content Manager', desc: 'Update pages, blogs & resources', path: '/admin/content-manager', icon: '📝', bg: '#fffbeb', border: '#fde68a' },
+          ].map(act => (
+            <button key={act.title} type="button" onClick={() => navigate(act.path)}
+              className="ad-action-card"
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                padding: '18px', borderRadius: '14px', border: `1px solid ${act.border}`,
+                background: act.bg, cursor: 'pointer', textAlign: 'left', outline: 'none',
+                transition: 'all 0.18s ease'
               }}>
-                {item.status}
-              </span>
-            </div>
+              <span style={{ fontSize: '24px', marginBottom: '8px' }}>{act.icon}</span>
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', marginBottom: '3px' }}>{act.title}</span>
+              <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>{act.desc}</span>
+            </button>
           ))}
         </div>
       </div>
@@ -162,3 +146,4 @@ export const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+

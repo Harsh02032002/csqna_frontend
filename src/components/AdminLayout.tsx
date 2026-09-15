@@ -103,24 +103,13 @@ export const AdminLayout: React.FC = () => {
           borderBottom: '1px solid #f0f2f8',
           display: 'flex', alignItems: 'center',
           justifyContent: collapsed ? 'center' : 'flex-start',
-          minHeight: '68px', gap: '10px',
+          minHeight: '68px',
         }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
-              background: `linear-gradient(135deg, ${ACCENT}, #a78bfa)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(124,58,237,0.25)',
-            }}>
-              <img src="/marketing-assets/images/logo/Favicon.png" alt="CSQNA"
-                style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
-            </div>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <img src="/marketing-assets/images/logo/FamousDotsLogo.png" alt="CSQNA"
+              style={{ height: collapsed ? '22px' : '26px', maxWidth: collapsed ? '36px' : '140px', objectFit: 'contain' }} />
             {!collapsed && (
-              <div>
-                <img src="/marketing-assets/images/logo/FamousDotsLogo.png" alt="CSQNA"
-                  style={{ height: '22px', objectFit: 'contain', display: 'block' }} />
-                <span style={{ fontSize: '9px', color: ACCENT, fontWeight: '700', letterSpacing: '2px' }}>ADMIN</span>
-              </div>
+              <span style={{ fontSize: '9px', color: ACCENT, fontWeight: '700', letterSpacing: '2px', background: ACCENT_LIGHT, padding: '2px 6px', borderRadius: '4px' }}>ADMIN</span>
             )}
           </Link>
         </div>

@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
               <img src="/marketing-assets/images/logo/FamousDotsLogo.png" alt="CSQNA" style={{ maxWidth: '150px' }} />
             </Link>
             <Link to="/" className="sticky-logo">
-              <img src="/marketing-assets/images/logo/Favicon.png" style={{ maxWidth: '40px' }} alt="CSQNA" />
+              <img src="/marketing-assets/images/logo/FamousDotsLogo.png" style={{ maxWidth: '120px' }} alt="CSQNA" />
             </Link>
 
             <div className="ml-auto d-flex align-items-center">

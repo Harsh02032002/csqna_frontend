@@ -41,3 +41,28 @@ if (fs.existsSync(srcDir)) {
 } else {
   console.log('Original src directory not found. Skipping copy (using existing public/ folder).');
 }
+
+// Sync single CSQNA text logo over all legacy icon files
+try {
+  const srcLogo = path.resolve('public/marketing-assets/images/logo/FamousDotsLogo.png');
+  if (fs.existsSync(srcLogo)) {
+    const targets = [
+      'public/favicon.ico',
+      'public/marketing-assets/images/logo/Favicon.png',
+      'public/marketing-assets/images/logo/favicon.png',
+      'public/marketing-assets/images/logo/1.jpg',
+      'public/marketing-assets/images/logo/5.jpg',
+      'public/marketing-assets/images/logo/Icon.jpg',
+      'public/marketing-assets/images/logo/logooption-9.jpg',
+    ];
+    targets.forEach((target) => {
+      const fullPath = path.resolve(target);
+      const dir = path.dirname(fullPath);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.copyFileSync(srcLogo, fullPath);
+    });
+    console.log('[Logo Sync] Overwrote all favicons with FamousDotsLogo.png');
+  }
+} catch (e) {
+  console.error('[Logo Sync Error]', e);
+}
