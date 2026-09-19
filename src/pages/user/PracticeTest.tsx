@@ -1,6 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import {
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Trophy,
+  ClipboardList,
+  Target,
+  BarChart2,
+  FileText,
+  Zap,
+  Lightbulb,
+  BookOpen,
+  Crosshair,
+  TrendingUp,
+  Sliders,
+  Calendar,
+  Clock as ClockIcon,
+  ChevronRight,
+  Sparkles,
+  HelpCircle,
+  ArrowRight
+} from 'lucide-react';
 
 /* ─── helpers ────────────────────────────────────────────────────────────────── */
 const getOptionsArray = (options: any): { key: string; text: string }[] => {
@@ -199,141 +221,490 @@ export const PracticeTest: React.FC = () => {
   );
 
   /* ══ SCORE REPORT ════════════════════════════════════════════════════════ */
+  /* ══ SCORE REPORT ════════════════════════════════════════════════════════ */
+  /* ══ SCORE REPORT ════════════════════════════════════════════════════════ */
   if (reportData) {
     const totalQ     = testData?.testQuestions?.length || 0;
     const correct    = reportData.correctAnswers || 0;
-    const wrong      = totalQ - correct;
+    const wrong      = Math.max(0, totalQ - correct);
     const scoreVal   = parseFloat(reportData.score?.toFixed(1) || '0.0');
     const passed     = scoreVal >= 70;
-    const statusColor = passed ? '#4ade80' : scoreVal >= 50 ? '#fbbf24' : '#f87171';
-    const statusBg   = passed ? 'rgba(74,222,128,0.15)' : scoreVal >= 50 ? 'rgba(251,191,36,0.15)' : 'rgba(248,113,113,0.15)';
+    const accuracy   = totalQ > 0 ? Math.round((correct / totalQ) * 100) : 0;
+    
+    const statusColor = passed ? '#16a34a' : scoreVal >= 50 ? '#d97706' : '#e11d48';
+    const statusBg   = passed ? '#f0fdf4' : scoreVal >= 50 ? '#fffbeb' : '#ffe4e6';
+    const statusBorder = passed ? '#bbf7d0' : scoreVal >= 50 ? '#fde68a' : '#fecdd3';
+
+    // Dynamic Domain / Category Performance (Purely dynamic from question bank)
+    const PALETTE = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f43f5e', '#14b8a6', '#84cc16'];
+
+    const getDomainPerformance = () => {
+      const questions = testData?.testQuestions || [];
+      if (!questions.length) return [];
+
+      const categoryMap: Record<string, { total: number; correct: number }> = {};
+
+      questions.forEach((q: any) => {
+        const rawCat = (
+          q.category ||
+          q.domain ||
+          q.topic ||
+          q.subject ||
+          q.categoryName ||
+          testData?.category ||
+          'General'
+        ).toString().trim();
+
+        if (!categoryMap[rawCat]) {
+          categoryMap[rawCat] = { total: 0, correct: 0 };
+        }
+        categoryMap[rawCat].total += 1;
+
+        const uAns = selectedAnswers[q._id] || (Array.isArray(q.userAnswer) ? q.userAnswer : q.userAnswer ? [q.userAnswer] : []);
+        const cAns = Array.isArray(q.correctAnswer) ? q.correctAnswer : q.correctAnswer !== undefined ? [q.correctAnswer] : [];
+        const isCorr = cAns.length > 0 && uAns.length === cAns.length && uAns.every((a: string) => cAns.includes(a));
+
+        if (isCorr) {
+          categoryMap[rawCat].correct += 1;
+        }
+      });
+
+      const categories = Object.keys(categoryMap);
+
+      return categories.map((catName, idx) => {
+        const data = categoryMap[catName];
+        const pct = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+        return {
+          name: catName,
+          color: PALETTE[idx % PALETTE.length],
+          total: data.total,
+          correct: data.correct,
+          pct: pct
+        };
+      });
+    };
+
+    const domainStats = getDomainPerformance();
+
+    // Adaptive SVG Radar/Gauge Chart Component
+    const RenderRadarChart = ({ stats }: { stats: typeof domainStats }) => {
+      const size = 160;
+      const cx = size / 2;
+      const cy = size / 2;
+      const radius = 60;
+      const n = stats.length;
+
+      if (n === 0) return null;
+
+      if (n === 1) {
+        const r = 48;
+        const circ = 2 * Math.PI * r;
+        const offset = circ - (stats[0].pct / 100) * circ;
+        return (
+          <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+              <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e2e8f0" strokeWidth="10" />
+              <circle cx={cx} cy={cy} r={r} fill="none" stroke={stats[0].color} strokeWidth="10"
+                strokeDasharray={circ} strokeDashoffset={offset}
+                strokeLinecap="round" transform={`rotate(-90 ${cx} ${cy})`}
+                style={{ transition: 'stroke-dashoffset 1s ease' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', fontWeight: '900', color: stats[0].color }}>{stats[0].pct}%</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy</div>
+            </div>
+          </div>
+        );
+      }
+
+      if (n === 2) {
+        return (
+          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+            <line x1={20} y1={cy} x2={size - 20} y2={cy} stroke="#e2e8f0" strokeWidth="2" />
+            <line x1={cx} y1={20} x2={cx} y2={size - 20} stroke="#e2e8f0" strokeWidth="2" />
+            <circle cx={cx - (stats[0].pct / 100) * 50} cy={cy} r="6" fill={stats[0].color} />
+            <circle cx={cx + (stats[1].pct / 100) * 50} cy={cy} r="6" fill={stats[1].color} />
+          </svg>
+        );
+      }
+
+      const gridLevels = [0.25, 0.5, 0.75, 1.0];
+      const gridPolygons = gridLevels.map(lvl => {
+        return Array.from({ length: n }).map((_, i) => {
+          const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+          const r = lvl * radius;
+          return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+        }).join(' ');
+      });
+
+      const valPolygon = stats.map((s, i) => {
+        const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+        const r = Math.max(6, (s.pct / 100) * radius);
+        return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+      }).join(' ');
+
+      return (
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {gridPolygons.map((pts, i) => (
+            <polygon key={i} points={pts} fill="none" stroke="#e2e8f0" strokeWidth="1" strokeDasharray={i === 3 ? 'none' : '2,2'} />
+          ))}
+          {Array.from({ length: n }).map((_, i) => {
+            const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+            return (
+              <line key={i} x1={cx} y1={cy} x2={cx + radius * Math.cos(angle)} y2={cy + radius * Math.sin(angle)} stroke="#e2e8f0" strokeWidth="1" />
+            );
+          })}
+          <polygon points={valPolygon} fill="rgba(99, 102, 241, 0.2)" stroke="#6366f1" strokeWidth="2" />
+          {stats.map((s, i) => {
+            const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+            const r = Math.max(6, (s.pct / 100) * radius);
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            return <circle key={i} cx={x} cy={y} r="3.5" fill={s.color} stroke="#fff" strokeWidth="1" />;
+          })}
+        </svg>
+      );
+    };
 
     return (
-      <div style={{ maxWidth: '860px', margin: '0 auto', fontFamily: "'Inter','Segoe UI',sans-serif" }}>
+      <div style={{ maxWidth: '1180px', margin: '0 auto', fontFamily: "'Inter','Segoe UI',sans-serif", color: '#0f172a' }}>
         <style>{`
-          @keyframes ptFadeUp  { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-          @keyframes ptSpin    { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-          @keyframes ptPop     { 0%{transform:scale(.8);opacity:0} 70%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
-          @keyframes ptShine   { from{left:-100%} to{left:200%} }
-          .pt-result-card      { animation: ptFadeUp .5s ease both; }
-          .pt-stat-box         { transition: transform .2s ease, box-shadow .2s ease; }
-          .pt-stat-box:hover   { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important; }
-          .pt-btn-primary      { transition: all .2s ease; }
-          .pt-btn-primary:hover{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.4) !important; }
-          .pt-btn-ghost:hover  { background: #f1f5f9 !important; }
-          .pt-review-row       { transition: background .15s ease; }
-          .pt-review-row:hover { background: #f8fafc !important; }
+          @keyframes ptFadeUp  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+          .pt-ss3-card        { animation: ptFadeUp .4s ease both; }
+          .pt-ss3-btn         { transition: all .2s ease; cursor: pointer; }
+          .pt-ss3-btn:hover   { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06) !important; }
+          .pt-ss3-next-step   { transition: all .2s ease; cursor: pointer; }
+          .pt-ss3-next-step:hover { transform: translateY(-3px); border-color: #6366f1 !important; box-shadow: 0 8px 24px rgba(99,102,241,0.08) !important; }
         `}</style>
 
-        {/* ── Hero Score Card ── */}
-        <div className="pt-result-card" style={{
-          background: 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#1a1035 100%)',
-          borderRadius: '24px', padding: '40px', color: '#fff',
-          marginBottom: '20px', position: 'relative', overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(15,23,42,0.4)',
-          animationDelay: '0s',
+        {/* ── Breadcrumbs ── */}
+        <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ cursor: 'pointer', color: '#475569' }} onClick={() => navigate('/panel/dashboard')}>Dashboard</span>
+          <span>›</span>
+          <span style={{ color: '#0f172a', fontWeight: '600' }}>Test Result</span>
+        </div>
+
+        {/* ── Top Main Hero Container (Matching SS3) ── */}
+        <div className="pt-ss3-card" style={{
+          background: 'linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%)',
+          borderRadius: '24px', padding: '36px 40px',
+          border: '1px solid #e0e7ff', boxShadow: '0 10px 40px rgba(99,102,241,0.05)',
+          marginBottom: '24px', position: 'relative'
         }}>
-          {/* bg glows */}
-          <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '260px', height: '260px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(124,58,237,.35) 0%,transparent 70%)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-40px', left: '60px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(99,102,241,.2) 0%,transparent 70%)', pointerEvents: 'none' }} />
+          {/* Top-Right Handwritten Annotation */}
+          <div style={{
+            position: 'absolute', top: '28px', right: '40px',
+            textAlign: 'right', pointerEvents: 'none'
+          }}>
+            <div style={{
+              fontFamily: "'Segoe Script', 'Caveat', 'Comic Sans MS', cursive",
+              fontSize: '15px', fontWeight: '700', color: '#4f46e5',
+              transform: 'rotate(-3deg)', display: 'flex', alignItems: 'center', gap: '4px'
+            }}>
+              <span>Keep Practicing You'll Get There!</span>
+              <svg width="24" height="20" viewBox="0 0 24 20" fill="none">
+                <path d="M 3 16 Q 14 14 18 5" stroke="#4f46e5" strokeWidth="2.2" strokeLinecap="round" />
+                <path d="M 12 5 L 18 5 L 18 11" stroke="#4f46e5" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </div>
 
-          {/* header */}
-          <p style={{ margin: '0 0 4px', fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '2.5px', fontWeight: '700' }}>ASSESSMENT COMPLETE</p>
-          <h2 style={{ margin: '0 0 32px', fontSize: '20px', fontWeight: '800', color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.3px' }}>
-            {testData?.testname}
-          </h2>
+          {/* Title & Badge Header */}
+          <div style={{ marginBottom: '28px' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              padding: '5px 14px', borderRadius: '20px', background: '#ede9fe',
+              color: '#4338ca', fontSize: '11px', fontWeight: '800', letterSpacing: '0.8px',
+              marginBottom: '12px'
+            }}>
+              <CheckCircle2 size={14} /> ASSESSMENT COMPLETE
+            </span>
+            <h1 style={{ margin: '0 0 8px', fontSize: '28px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.5px' }}>
+              {testData?.testname || 'PRACTICE_TEST_1789797814323'}
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12.5px', color: '#64748b', fontWeight: '500' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Calendar size={14} style={{ color: '#6366f1' }} />
+                Completed on {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ClockIcon size={14} style={{ color: '#6366f1' }} />
+                Time Taken: --
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ClipboardList size={14} style={{ color: '#6366f1' }} />
+                {totalQ} Questions
+              </span>
+            </div>
+          </div>
 
-          {/* ring + stats row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '36px', flexWrap: 'wrap' }}>
-            {/* Ring */}
-            <div style={{ position: 'relative', width: '180px', height: '180px', flexShrink: 0 }}>
-              <ScoreRing pct={scoreVal} passed={passed} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '38px', fontWeight: '900', color: statusColor, lineHeight: 1, letterSpacing: '-2px', animation: 'ptPop .6s ease .3s both' }}>
-                  {scoreVal}%
-                </span>
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', letterSpacing: '1.5px', fontWeight: '600', marginTop: '4px' }}>FINAL SCORE</span>
+          {/* 2-Column Hero Body */}
+          <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', marginBottom: '24px' }}>
+            
+            {/* LEFT: Donut Readiness & Score Badge */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)',
+              borderRadius: '20px', padding: '28px 24px', border: '1px solid #e2e8f0',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center'
+            }}>
+              <div style={{ position: 'relative', width: '190px', height: '190px', marginBottom: '16px' }}>
+                <ScoreRing pct={scoreVal} passed={passed} />
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '42px', fontWeight: '900', color: statusColor, lineHeight: 1, letterSpacing: '-1.5px' }}>
+                    {scoreVal}%
+                  </span>
+                  <span style={{ fontSize: '10px', color: '#64748b', letterSpacing: '1px', fontWeight: '800', marginTop: '6px' }}>OVERALL READINESS</span>
+                </div>
+              </div>
+
+              <div style={{ width: '100%', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#64748b' }}>
+                  Your Score
+                </p>
+                <p style={{ margin: '0 0 10px', fontSize: '28px', fontWeight: '900', color: '#0f172a' }}>
+                  {Math.round((scoreVal / 100) * totalQ * 4)} / 100
+                </p>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 20px', borderRadius: '30px',
+                    background: statusBg, border: `1px solid ${statusBorder}`,
+                    color: statusColor, fontWeight: '800', fontSize: '12px', letterSpacing: '0.5px'
+                  }}>
+                    {passed ? <><CheckCircle2 size={14} /> PASSED</> : scoreVal >= 50 ? <><AlertCircle size={14} /> AVERAGE</> : <><XCircle size={14} /> NEEDS IMPROVEMENT</>}
+                  </span>
+                </div>
+
+                <p style={{ margin: '0 auto', fontSize: '11.5px', color: '#64748b', lineHeight: 1.5, maxWidth: '250px' }}>
+                  {passed ? 'Great work! You have passed this assessment.' : 'This is a great starting point! Review the questions and keep practicing to build your cybersecurity skills.'}
+                </p>
               </div>
             </div>
 
-            {/* stat boxes */}
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', flex: 1 }}>
-              {[
-                { label: 'Total Questions', value: totalQ, icon: '📋', color: '#c4b5fd', bg: 'rgba(196,181,253,0.12)' },
-                { label: 'Correct', value: correct, icon: '✅', color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
-                { label: 'Incorrect', value: wrong, icon: '❌', color: '#f87171', bg: 'rgba(248,113,113,0.12)' },
-                { label: 'Accuracy', value: `${totalQ > 0 ? Math.round((correct/totalQ)*100) : 0}%`, icon: '🎯', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
-              ].map((s, i) => (
-                <div key={i} className="pt-stat-box" style={{ background: s.bg, border: `1px solid ${s.color}33`, borderRadius: '16px', padding: '16px 20px', minWidth: '110px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', animation: `ptFadeUp .4s ease ${0.1 + i * 0.08}s both` }}>
-                  <div style={{ fontSize: '22px', marginBottom: '6px' }}>{s.icon}</div>
-                  <p style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: s.color, letterSpacing: '-0.5px' }}>{s.value}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: '600', letterSpacing: '0.8px' }}>{s.label.toUpperCase()}</p>
+            {/* RIGHT: Large White Card Container */}
+            <div style={{
+              background: '#ffffff', borderRadius: '20px', padding: '24px',
+              border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+            }}>
+              {/* Top Row: Domain Performance & Accuracy */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                {/* DOMAIN PERFORMANCE */}
+                <div style={{ padding: '4px' }}>
+                  <h4 style={{ margin: '0 0 14px', fontSize: '11px', fontWeight: '800', color: '#1e1b4b', letterSpacing: '1px' }}>
+                    DOMAIN PERFORMANCE
+                  </h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ flexShrink: 0 }}>
+                      <RenderRadarChart stats={domainStats} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                      {domainStats.map((d, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: '600', color: '#334155' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: d.color }} />
+                            <span>{d.name}</span>
+                          </div>
+                          <span style={{ fontWeight: '800', color: '#0f172a' }}>{d.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              ))}
+
+                {/* ACCURACY RATE */}
+                <div style={{ padding: '4px', borderLeft: '1px solid #f1f5f9', paddingLeft: '20px' }}>
+                  <h4 style={{ margin: '0 0 16px', fontSize: '11px', fontWeight: '800', color: '#1e1b4b', letterSpacing: '1px' }}>
+                    ACCURACY RATE
+                  </h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{
+                      width: '52px', height: '52px', borderRadius: '50%',
+                      background: '#fff1f2', border: '1px solid #fecdd3',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <Target size={26} color="#e11d48" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '32px', fontWeight: '900', color: '#0f172a', lineHeight: 1 }}>
+                        {accuracy}%
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', marginTop: '4px' }}>
+                        {correct} correct out of {totalQ}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Row: 4 Stat Boxes inside Card */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                {[
+                  { label: 'QUESTIONS PRACTICED', val: totalQ, sub: 'Total Questions', icon: <ClipboardList size={22} color="#1d4ed8" />, bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8' },
+                  { label: 'CORRECT', val: correct, sub: 'Answered Correctly', icon: <CheckCircle2 size={22} color="#15803d" />, bg: '#f0fdf4', border: '#bbf7d0', color: '#15803d' },
+                  { label: 'INCORRECT', val: wrong, sub: 'Answered Incorrectly', icon: <XCircle size={22} color="#b91c1c" />, bg: '#fef2f2', border: '#fecaca', color: '#b91c1c' },
+                  { label: 'TESTS COMPLETED', val: 1, sub: 'Total Tests Taken', icon: <Trophy size={22} color="#b45309" />, bg: '#fffbeb', border: '#fde68a', color: '#b45309' },
+                ].map((st, i) => (
+                  <div key={i} style={{ background: st.bg, border: `1px solid ${st.border}`, borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{st.icon}</div>
+                    <div>
+                      <h5 style={{ margin: 0, fontSize: '9.5px', fontWeight: '800', color: st.color, letterSpacing: '0.5px' }}>{st.label}</h5>
+                      <p style={{ margin: '2px 0 0', fontSize: '20px', fontWeight: '900', color: '#0f172a', lineHeight: 1 }}>{st.val}</p>
+                      <p style={{ margin: '2px 0 0', fontSize: '10px', color: '#64748b', fontWeight: '500' }}>{st.sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── Middle Action Row (Matching SS3) ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          
+          {/* Card 1: View All Reports */}
+          <div onClick={() => navigate('/panel/reports')} className="pt-ss3-btn" style={{
+            background: '#ffffff', borderRadius: '18px', padding: '20px 24px',
+            border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f3f0ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BarChart2 size={22} color="#7c3aed" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>View All Reports</h4>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Detailed analysis & history</p>
+              </div>
+            </div>
+            <ChevronRight size={20} color="#6366f1" />
+          </div>
+
+          {/* Card 2: Question Review */}
+          <div onClick={() => setShowReview(r => !r)} className="pt-ss3-btn" style={{
+            background: '#ffffff', borderRadius: '18px', padding: '20px 24px',
+            border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={22} color="#2563eb" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>
+                  {showReview ? 'Hide Review' : 'Question Review'}
+                </h4>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Go through your answers</p>
+              </div>
+            </div>
+            <ChevronRight size={20} color="#6366f1" />
+          </div>
+
+          {/* Card 3: New Test → */}
+          <div onClick={() => navigate('/panel/create')} className="pt-ss3-btn" style={{
+            background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+            borderRadius: '18px', padding: '20px 24px', color: '#ffffff',
+            boxShadow: '0 6px 20px rgba(124,58,237,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Zap size={22} color="#f59e0b" fill="#f59e0b" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  New Test <ArrowRight size={16} />
+                </h4>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: '500' }}>Practice another test</p>
+              </div>
+            </div>
+            <ChevronRight size={20} color="#ffffff" />
+          </div>
+
+        </div>
+
+        {/* ── Bottom Section: Next Steps for You (Matching SS3) ── */}
+        <div style={{
+          background: '#f8fafc', borderRadius: '24px', padding: '28px 32px',
+          border: '1px solid #e2e8f0', marginBottom: '24px', position: 'relative'
+        }}>
+          {/* Header Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#3730a3', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lightbulb size={20} color="#4338ca" /> Next Steps for You
+            </h4>
+            <div style={{
+              fontFamily: "'Segoe Script', 'Caveat', 'Comic Sans MS', cursive",
+              fontSize: '15px', fontWeight: '700', color: '#4f46e5',
+              display: 'flex', alignItems: 'center', gap: '4px'
+            }}>
+              <span>Small Steps Big Progress!</span>
+              <svg width="24" height="20" viewBox="0 0 24 20" fill="none">
+                <path d="M 3 16 Q 14 14 18 5" stroke="#4f46e5" strokeWidth="2.2" strokeLinecap="round" />
+                <path d="M 12 5 L 18 5 L 18 11" stroke="#4f46e5" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
           </div>
 
-          {/* Status badge */}
-          <div style={{ marginTop: '28px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '7px',
-              padding: '8px 20px', borderRadius: '40px',
-              background: statusBg, border: `1px solid ${statusColor}55`,
-              color: statusColor, fontWeight: '800', fontSize: '13px', letterSpacing: '1px',
-            }}>
-              {passed ? <IconCheck /> : <IconX />}
-              {passed ? 'PASSED' : scoreVal >= 50 ? 'AVERAGE' : 'NEEDS IMPROVEMENT'}
-            </span>
-            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-              {passed ? 'Great work! You passed this assessment.' : 'Keep practicing — you\'ll get there!'}
-            </span>
+          {/* 4 Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            {[
+              { title: 'Review Your Answers', desc: 'Understand mistakes and learn from explanations', icon: <BookOpen size={20} color="#2563eb" />, iconBg: '#eff6ff', action: () => { setShowReview(true); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); } },
+              { title: 'Focus on Weak Areas', desc: 'Practice domain-wise for better results', icon: <Crosshair size={20} color="#db2777" />, iconBg: '#fdf2f8', action: () => navigate('/panel/create') },
+              { title: 'Track Your Progress', desc: 'Take more tests to improve your readiness', icon: <TrendingUp size={20} color="#7c3aed" />, iconBg: '#f3f0ff', action: () => navigate('/panel/reports') },
+              { title: 'Create Custom Test', desc: 'Configure difficulty, timing & topic mix', icon: <Sliders size={20} color="#b45309" />, iconBg: '#fffbeb', action: () => navigate('/panel/create') },
+            ].map((ns, i) => (
+              <div key={i} onClick={ns.action} className="pt-ss3-next-step" style={{
+                background: '#ffffff', borderRadius: '18px', padding: '20px 18px',
+                border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                minHeight: '140px'
+              }}>
+                <div>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: ns.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                    {ns.icon}
+                  </div>
+                  <h5 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{ns.title}</h5>
+                  <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b', lineHeight: 1.45, fontWeight: '500' }}>{ns.desc}</p>
+                </div>
+                <div style={{ alignSelf: 'flex-end', marginTop: '14px' }}>
+                  <ChevronRight size={18} color="#6366f1" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* ── Action Buttons ── */}
-        <div className="pt-result-card" style={{ display: 'flex', gap: '12px', marginBottom: '20px', animationDelay: '.15s' }}>
-          <button onClick={() => navigate('/panel/reports')} className="pt-btn-ghost"
-            style={{ flex: 1, padding: '14px', background: '#fff', border: '2px solid #e2e8f0', borderRadius: '14px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', color: '#475569', transition: 'all .2s ease' }}>
-            📊 View All Reports
-          </button>
-          <button onClick={() => setShowReview(r => !r)} className="pt-btn-ghost"
-            style={{ flex: 1, padding: '14px', background: '#fff', border: '2px solid #e2e8f0', borderRadius: '14px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', color: '#475569', transition: 'all .2s ease' }}>
-            {showReview ? '▲ Hide Review' : '📝 Question Review'}
-          </button>
-          <button onClick={() => navigate('/panel/create')} className="pt-btn-primary"
-            style={{ flex: 1, padding: '14px', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '700', fontSize: '14px', color: '#fff', boxShadow: '0 4px 20px rgba(124,58,237,0.3)' }}>
-            ⚡ New Test →
-          </button>
-        </div>
-
-        {/* ── Question Review ── */}
+        {/* ── Question Review Dropdown ── */}
         {showReview && (
-          <div className="pt-result-card" style={{ background: '#fff', borderRadius: '20px', padding: '28px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', animationDelay: '.2s' }}>
-            <h4 style={{ margin: '0 0 20px', fontSize: '15px', fontWeight: '700', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="pt-ss3-card" style={{ background: '#ffffff', borderRadius: '20px', padding: '28px', border: '1px solid #e2e8f0', boxShadow: '0 4px 24px rgba(0,0,0,0.04)' }}>
+            <h4 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: '900', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
               📝 Question Review
-              <span style={{ background: '#ede9fe', color: '#7c3aed', fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '20px' }}>
+              <span style={{ background: '#ede9fe', color: '#4338ca', fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '20px' }}>
                 {testData?.testQuestions?.length} questions
               </span>
             </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {testData?.testQuestions?.map((q: any, idx: number) => {
-                const uAns = selectedAnswers[q._id] || [];
+                const uAns = selectedAnswers[q._id] || (Array.isArray(q.userAnswer) ? q.userAnswer : q.userAnswer ? [q.userAnswer] : []);
                 const opts = getOptionsArray(q.options);
                 return (
-                  <div key={q._id} className="pt-review-row" style={{ padding: '16px', background: '#fafafa', borderRadius: '14px', border: '1px solid #f0f2f8' }}>
-                    <p style={{ margin: '0 0 10px', fontSize: '13.5px', fontWeight: '600', color: '#1e293b', lineHeight: 1.6 }}>
-                      <span style={{ color: '#7c3aed', marginRight: '6px', fontWeight: '700' }}>Q{idx + 1}.</span>
+                  <div key={q._id} style={{ padding: '18px', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                    <p style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: '600', color: '#0f172a', lineHeight: 1.6 }}>
+                      <span style={{ color: '#4f46e5', marginRight: '6px', fontWeight: '800' }}>Q{idx + 1}.</span>
                       {q.question}
                     </p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {opts.map(opt => {
                         const sel = uAns.includes(opt.text);
                         return (
                           <span key={opt.key} style={{
-                            padding: '5px 12px', borderRadius: '8px', fontSize: '12px',
-                            background: sel ? '#ede9fe' : '#f1f5f9',
-                            border: `1px solid ${sel ? '#c4b5fd' : '#e2e8f0'}`,
-                            color: sel ? '#7c3aed' : '#94a3b8',
+                            padding: '6px 14px', borderRadius: '8px', fontSize: '12px',
+                            background: sel ? '#e0e7ff' : '#ffffff',
+                            border: `1px solid ${sel ? '#a5b4fc' : '#cbd5e1'}`,
+                            color: sel ? '#3730a3' : '#64748b',
                             fontWeight: sel ? '700' : '400',
                           }}>
                             {sel && '✓ '}{opt.text}
