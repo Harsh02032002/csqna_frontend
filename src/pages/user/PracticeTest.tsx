@@ -19,8 +19,6 @@ import {
   Calendar,
   Clock as ClockIcon,
   ChevronRight,
-  Sparkles,
-  HelpCircle,
   ArrowRight
 } from 'lucide-react';
 
@@ -51,12 +49,6 @@ const ScoreRing: React.FC<{ pct: number; passed: boolean }> = ({ pct, passed }) 
     </svg>
   );
 };
-
-/* ─── SVG Icons ──────────────────────────────────────────────────────────────── */
-const IconCheck = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>;
-const IconX     = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-const IconArrow = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IconFlag  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>;
 
 const LABELS = ['A', 'B', 'C', 'D', 'E'];
 
