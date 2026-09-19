@@ -19,7 +19,8 @@ import {
   Calendar,
   Clock as ClockIcon,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  Flag
 } from 'lucide-react';
 
 /* ─── helpers ────────────────────────────────────────────────────────────────── */
@@ -767,7 +768,7 @@ export const PracticeTest: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <IconFlag />
+            <Flag size={18} color="#fff" />
           </div>
           <div>
             <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#1e293b', maxWidth: '380px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{testData.testname}</p>
@@ -868,7 +869,7 @@ export const PracticeTest: React.FC = () => {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', fontWeight: '800', transition: 'all .15s ease',
                     }}>
-                      {sel ? <IconCheck /> : LABELS[i] || i + 1}
+                      {sel ? <CheckCircle2 size={16} /> : LABELS[i] || i + 1}
                     </span>
                     <span style={{ fontSize: '14px', color: sel ? '#4c1d95' : '#374151', lineHeight: '1.65', fontWeight: sel ? '600' : '400', flex: 1 }}>
                       {opt.text}
@@ -919,7 +920,7 @@ export const PracticeTest: React.FC = () => {
               ) : (
                 <button type="button" onClick={handleNext} className="pt-nav-btn"
                   style={{ padding: '12px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Next <IconArrow />
+                  Next <ArrowRight size={16} />
                 </button>
               )}
             </div>
