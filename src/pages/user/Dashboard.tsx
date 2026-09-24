@@ -18,8 +18,7 @@ import {
   AlertTriangle,
   Network,
   User,
-  Zap,
-  Settings
+  Zap
 } from 'lucide-react';
 
 const TRENDING = [

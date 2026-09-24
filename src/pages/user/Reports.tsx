@@ -6,19 +6,12 @@ import {
   FileText,
   Trophy,
   TrendingUp,
-  Target,
   Shield,
   Search,
   Filter,
   Printer,
   MoreVertical,
-  ArrowUpRight,
-  Lock,
-  AlertTriangle,
-  Network,
-  User,
-  Zap,
-  ArrowRight
+  ArrowUpRight
 } from 'lucide-react';
 
 /* ─── Print Report Generator ─── */
@@ -60,16 +53,6 @@ const handlePrint = (test: any) => {
   </body></html>`);
   w.document.close();
 };
-
-/* ─── Top Performing Domains Data ─── */
-const TOP_DOMAINS = [
-  { name: 'Data Protection & Privacy', rank: 1, pct: 94, icon: Shield, color: '#7c3aed', bg: '#f3e8ff' },
-  { name: 'Information Security Risk', rank: 2, pct: 87, icon: AlertTriangle, color: '#e11d48', bg: '#ffe4e6' },
-  { name: 'Network Security', rank: 3, pct: 81, icon: Network, color: '#16a34a', bg: '#dcfce7' },
-  { name: 'Encryption & Cryptography', rank: 4, pct: 76, icon: Lock, color: '#d97706', bg: '#fef3c7' },
-  { name: 'Identity & Access Management', rank: 5, pct: 70, icon: User, color: '#2563eb', bg: '#dbeafe' },
-  { name: 'Malware Protection', rank: 6, pct: 64, icon: Zap, color: '#0284c7', bg: '#e0f2fe' },
-];
 
 export const Reports: React.FC = () => {
   const [tests, setTests] = useState<any[]>([]);

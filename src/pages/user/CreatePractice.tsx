@@ -21,7 +21,6 @@ import {
   ArrowRight,
   Sliders,
   Clock,
-  HelpCircle,
   Sparkles
 } from 'lucide-react';
 
@@ -37,11 +36,10 @@ export const CreatePractice: React.FC = () => {
   const [selectedCert, setSelectedCert] = useState<string>('');
   const [certSearchQuery, setCertSearchQuery] = useState('');
 
-  const [difficultyLevels] = useState<string[]>(['Any', 'Easy', 'Medium', 'Hard']);
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(['Any']);
+  const [selectedDifficulties] = useState<string[]>(['Any']);
   const [questionsCount, setQuestionsCount] = useState(25);
   const [duration, setDuration] = useState(40);
-  const [testName, setTestName] = useState('');
+  const [testName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 

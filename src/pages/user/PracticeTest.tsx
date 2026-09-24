@@ -8,15 +8,10 @@ import {
   AlertCircle,
   Trophy,
   ClipboardList,
-  Target,
   BarChart2,
   FileText,
   Zap,
   Lightbulb,
-  BookOpen,
-  Crosshair,
-  TrendingUp,
-  Sliders,
   Calendar,
   Clock as ClockIcon,
   ChevronRight,
@@ -24,11 +19,9 @@ import {
   Flag,
   User,
   FileQuestion,
-  ShieldCheck,
   Bookmark,
   Check
 } from 'lucide-react';
-import learnerImage from '../../../../pixel-perfect-path-47/src/assets/csqna-learner.png';
 
 /* ─── helpers ────────────────────────────────────────────────────────────────── */
 const getOptionsArray = (options: any): { key: string; text: string }[] => {
@@ -41,22 +34,6 @@ const getOptionsArray = (options: any): { key: string; text: string }[] => {
 
 const formatTime = (s: number) =>
   `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
-
-/* ─── Circular progress ring ─────────────────────────────────────────────────── */
-const ScoreRing: React.FC<{ pct: number; passed: boolean }> = ({ pct, passed }) => {
-  const r = 68, c = 2 * Math.PI * r;
-  const offset = c - (pct / 100) * c;
-  const color = passed ? '#4ade80' : pct >= 50 ? '#fbbf24' : '#f87171';
-  return (
-    <svg width="180" height="180" viewBox="0 0 180 180" style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx="90" cy="90" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="12" />
-      <circle cx="90" cy="90" r={r} fill="none" stroke={color} strokeWidth="12"
-        strokeDasharray={c} strokeDashoffset={offset}
-        strokeLinecap="round"
-        style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)', filter: `drop-shadow(0 0 8px ${color}88)` }} />
-    </svg>
-  );
-};
 
 const LABELS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -75,7 +52,6 @@ export const PracticeTest: React.FC = () => {
   const [showConfirm, setShowConfirm]       = useState(false);
   const [reportData, setReportData]         = useState<any>(null);
   const [errorMessage, setErrorMessage]     = useState('');
-  const [showReview, setShowReview]         = useState(false);
   const [partialNotice, setPartialNotice]   = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -240,7 +216,6 @@ export const PracticeTest: React.FC = () => {
     const wrong      = Math.max(0, totalQ - correct);
     const scoreVal   = parseFloat(reportData.score?.toFixed(1) || '0.0');
     const passed     = scoreVal >= 70;
-    const accuracy   = totalQ > 0 ? Math.round((correct / totalQ) * 100) : 0;
     
     const initialDuration = (testData?.duration || 40) * 60;
     const timeTakenSec = Math.max(10, initialDuration - remainingTime);
@@ -250,8 +225,6 @@ export const PracticeTest: React.FC = () => {
     const userName = user?.name || user?.username || 'Student User';
 
     const statusColor = passed ? '#16a34a' : scoreVal >= 50 ? '#d97706' : '#e11d48';
-    const statusBg   = passed ? '#f0fdf4' : scoreVal >= 50 ? '#fffbeb' : '#ffe4e6';
-    const statusBorder = passed ? '#bbf7d0' : scoreVal >= 50 ? '#fde68a' : '#fecdd3';
 
     // Dynamic Domain / Category Performance (Purely dynamic from question bank)
     const PALETTE = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f43f5e', '#14b8a6', '#84cc16'];
@@ -561,7 +534,7 @@ export const PracticeTest: React.FC = () => {
                       Questions Practiced
                     </small>
                     <b style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block', marginTop: '2px' }}>
-                      {reportData?.questionsPracticed || reportData?.totalQuestionsPracticed || user?.questionsPracticed || totalQ}
+                      {reportData?.questionsPracticed || reportData?.totalQuestionsPracticed || (user as any)?.questionsPracticed || totalQ}
                     </b>
                   </div>
                 </div>
@@ -623,7 +596,7 @@ export const PracticeTest: React.FC = () => {
                       Tests Completed
                     </small>
                     <b style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block', marginTop: '2px' }}>
-                      {reportData?.testsCompleted || reportData?.totalTestsCompleted || user?.testsCompleted || 1}
+                      {reportData?.testsCompleted || reportData?.totalTestsCompleted || (user as any)?.testsCompleted || 1}
                     </b>
                   </div>
                 </div>
