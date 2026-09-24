@@ -2,22 +2,33 @@ import React, { useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// ─── SVG Icons ─────────────────────────────────────────────────────────────
-const IconHome = () => (
+const IconLayoutGrid = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
   </svg>
 );
-const IconPencil = () => (
+const IconFileText = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
   </svg>
 );
-const IconChart = () => (
+const IconBarChart2 = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
     <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+  </svg>
+);
+const IconDatabase = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+  </svg>
+);
+const IconBookmark = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
   </svg>
 );
 const IconSettings = () => (
@@ -65,10 +76,10 @@ const ACCENT = '#7c3aed';
 const ACCENT_LIGHT = '#ede9fe';
 
 const navLinks = [
-  { to: '/panel/dashboard', label: 'Dashboard',       icon: <IconHome />     },
-  { to: '/panel/create',    label: 'Create Test',     icon: <IconPencil />   },
-  { to: '/panel/reports',   label: 'Reports & Scores',icon: <IconChart />    },
-  { to: '/panel/settings',  label: 'Settings',        icon: <IconSettings /> },
+  { to: '/panel/dashboard', label: 'Dashboard',       icon: <IconLayoutGrid /> },
+  { to: '/panel/create',    label: 'Create Test',     icon: <IconFileText />   },
+  { to: '/panel/reports',   label: 'Reports & Scores',icon: <IconBarChart2 />  },
+  { to: '/panel/settings',  label: 'Settings',        icon: <IconSettings />   },
 ];
 
 export const UserLayout: React.FC = () => {
@@ -87,7 +98,7 @@ export const UserLayout: React.FC = () => {
   const currentLabel = navLinks.find(l => l.to === location.pathname)?.label || 'Dashboard';
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f6fa', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -110,20 +121,20 @@ export const UserLayout: React.FC = () => {
         position: 'fixed', top: 0, left: 0, height: '100vh',
         transition: 'width .3s cubic-bezier(.4,0,.2,1)',
         zIndex: 100, overflow: 'hidden',
-        boxShadow: '2px 0 12px rgba(0,0,0,0.04)',
+        boxShadow: '2px 0 12px rgba(0,0,0,0.03)',
       }}>
 
         {/* Logo */}
         <div style={{
-          padding: collapsed ? '18px 0' : '18px 20px',
-          borderBottom: '1px solid #f0f2f8',
+          padding: collapsed ? '0 4px' : '0 12px',
+          borderBottom: '1px solid #e8eaf0',
           display: 'flex', alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          minHeight: '68px',
+          justifyContent: 'center',
+          height: '64px', minHeight: '64px', boxSizing: 'border-box'
         }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', width: '100%' }}>
             <img src="/marketing-assets/images/logo/FamousDotsLogo.png" alt="CSQNA"
-              style={{ height: collapsed ? '22px' : '26px', maxWidth: collapsed ? '36px' : '150px', objectFit: 'contain' }} />
+              style={{ height: collapsed ? '32px' : '48px', maxHeight: '52px', maxWidth: collapsed ? '54px' : '220px', objectFit: 'contain' }} />
           </Link>
         </div>
 
@@ -170,15 +181,15 @@ export const UserLayout: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
                 width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-                background: `linear-gradient(135deg, ${ACCENT}, #a78bfa)`,
+                background: '#7c3aed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff', fontWeight: '700', fontSize: '13px',
               }}>
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.name?.charAt(0)?.toUpperCase() || 'H'}
               </div>
               <div style={{ minWidth: 0 }}>
                 <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.name || 'User'}
+                  {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name) : 'User'}
                 </p>
                 <p style={{ margin: 0, fontSize: '10px', color: ACCENT, fontWeight: '600', letterSpacing: '0.5px' }}>
                   {user?.planDetails?.planName?.toUpperCase() || 'FREE PLAN'}
@@ -214,27 +225,52 @@ export const UserLayout: React.FC = () => {
 
         {/* Topbar */}
         <header style={{
-          height: '60px', background: '#ffffff',
+          height: '64px', background: '#ffffff',
           borderBottom: '1px solid #e8eaf0',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 24px', position: 'sticky', top: 0, zIndex: 99,
-          boxShadow: '0 1px 8px rgba(0,0,0,0.05)',
+          padding: '0 28px', position: 'sticky', top: 0, zIndex: 99,
+          boxShadow: '0 1px 8px rgba(0,0,0,0.03)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button onClick={() => setCollapsed(c => !c)} className="ul-icon-btn"
               style={{
-                background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer',
-                padding: '7px', borderRadius: '8px', color: '#64748b',
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: '6px', borderRadius: '8px', color: '#64748b',
                 display: 'flex', alignItems: 'center', transition: 'all .18s ease',
               }}>
               <IconMenu />
             </button>
-            <span style={{ fontWeight: '600', fontSize: '15px', color: '#1e293b' }}>
-              {currentLabel}
-            </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Search bar in center matching mockup */}
+          <div style={{ position: 'relative', width: '460px', maxWidth: '100%' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: '16px', top: '11px' }}>
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search tests, questions, certifications..."
+              style={{
+                width: '100%', padding: '9px 16px 9px 42px', borderRadius: '20px',
+                background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13px',
+                outline: 'none', color: '#0f172a'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Notification Bell */}
+            <button className="ul-icon-btn" style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '6px', borderRadius: '50%', color: '#64748b', position: 'relative',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }} title="Notifications">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444' }} />
+            </button>
 
             {/* Support */}
             <div style={{ position: 'relative' }}>
@@ -285,15 +321,15 @@ export const UserLayout: React.FC = () => {
               <button onClick={() => { setShowProfile(s => !s); setShowSupport(false); }}
                 className="ul-profile-btn"
                 style={{
-                  background: `linear-gradient(135deg, ${ACCENT}, #a78bfa)`,
+                  background: '#7c3aed',
                   border: 'none', borderRadius: '50%',
                   width: '36px', height: '36px', cursor: 'pointer',
-                  color: '#fff', fontWeight: '700', fontSize: '14px',
+                  color: '#fff', fontWeight: '800', fontSize: '14px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all .18s ease',
                   boxShadow: '0 2px 8px rgba(124,58,237,0.3)',
                 }} title="Profile">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.name?.charAt(0)?.toUpperCase() || 'H'}
               </button>
               {showProfile && (
                 <div className="ul-dropdown" style={{
@@ -332,7 +368,7 @@ export const UserLayout: React.FC = () => {
           </div>
         </header>
 
-        <main style={{ flex: 1, padding: '28px 28px', overflowY: 'auto', background: '#f5f6fa' }}>
+        <main style={{ flex: 1, padding: '28px 28px', overflowY: 'auto', background: '#ffffff' }}>
           <Outlet />
         </main>
       </div>

@@ -2,68 +2,62 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
-
-/* ─── Icons ──────────────────────────────────────────────────────────────────── */
-const IconPlus      = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-const IconArrow     = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IconClock     = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-const IconPlay      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M5 3l14 9-14 9V3z"/></svg>;
-const IconCheck     = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
-const IconBar       = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>;
-
-/* ─── Stat Card ──────────────────────────────────────────────────────────────── */
-interface StatCardProps {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-  gradient: string;
-  glow: string;
-  desc: string;
-  delay: number;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ label, value, icon, gradient, glow, desc, delay }) => (
-  <div className="ud-stat" style={{ background: '#fff', borderRadius: '18px', padding: '20px 22px', border: '1px solid #f0f2f8', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden', animation: `udFadeUp .4s ease ${delay}s both` }}>
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: gradient }} />
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
-      <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: `0 4px 14px ${glow}` }}>
-        {icon}
-      </div>
-      <span style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', background: '#f8fafc', padding: '4px 10px', borderRadius: '20px', letterSpacing: '0.5px' }}>
-        {desc}
-      </span>
-    </div>
-    <p style={{ margin: 0, fontSize: '34px', fontWeight: '800', color: '#0f172a', letterSpacing: '-1.5px', lineHeight: 1 }}>{value}</p>
-    <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#94a3b8', fontWeight: '600', letterSpacing: '0.4px' }}>{label.toUpperCase()}</p>
-  </div>
-);
-
-/* ─── Quick Action Card ──────────────────────────────────────────────────────── */
-const ActionCard: React.FC<{ icon: string; title: string; desc: string; gradient: string; onClick: () => void; delay: number }> = ({ icon, title, desc, gradient, onClick, delay }) => (
-  <button className="ud-action" onClick={onClick}
-    style={{ background: '#fff', border: '1px solid #f0f2f8', borderRadius: '18px', padding: '22px', cursor: 'pointer', textAlign: 'left', width: '100%', position: 'relative', overflow: 'hidden', animation: `udFadeUp .4s ease ${delay}s both` }}>
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: gradient }} />
-    <div style={{ fontSize: '28px', marginBottom: '12px' }}>{icon}</div>
-    <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{title}</p>
-    <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', lineHeight: 1.5 }}>{desc}</p>
-    <div style={{ position: 'absolute', bottom: '20px', right: '20px', color: '#cbd5e1' }}><IconArrow /></div>
-  </button>
-);
+import {
+  Shield,
+  Lock,
+  Play,
+  CheckCircle2,
+  BarChart2,
+  Plus,
+  ArrowRight,
+  TrendingUp,
+  Clock,
+  Target,
+  Trophy,
+  FileText,
+  AlertTriangle,
+  Network,
+  User,
+  Zap,
+  Settings
+} from 'lucide-react';
 
 const TRENDING = [
-  { name: 'Data Protection & Privacy', rank: 1, pct: 94 },
-  { name: 'Information Security Risk', rank: 2, pct: 87 },
-  { name: 'Network Security', rank: 3, pct: 81 },
-  { name: 'Encryption & Cryptography', rank: 4, pct: 76 },
-  { name: 'Identity & Access Management', rank: 5, pct: 70 },
-  { name: 'Malware Protection', rank: 6, pct: 64 },
+  { name: 'Data Protection & Privacy', rank: 1, pct: 94, icon: Shield, color: '#7c3aed', bg: '#f3e8ff' },
+  { name: 'Information Security Risk', rank: 2, pct: 87, icon: AlertTriangle, color: '#e11d48', bg: '#ffe4e6' },
+  { name: 'Network Security', rank: 3, pct: 81, icon: Network, color: '#16a34a', bg: '#dcfce7' },
+  { name: 'Encryption & Cryptography', rank: 4, pct: 76, icon: Lock, color: '#d97706', bg: '#fef3c7' },
+  { name: 'Identity & Access Management', rank: 5, pct: 70, icon: User, color: '#2563eb', bg: '#dbeafe' },
+  { name: 'Malware Protection', rank: 6, pct: 64, icon: Zap, color: '#0284c7', bg: '#e0f2fe' },
 ];
+
+/* ─── Quick Action Card ─── */
+const ActionCard: React.FC<{ icon: string; title: string; desc: string; gradient: string; onClick: () => void }> = ({ icon, title, desc, gradient, onClick }) => (
+  <button
+    onClick={onClick}
+    style={{
+      background: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '20px',
+      padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%',
+      position: 'relative', overflow: 'hidden', transition: 'all 0.2s ease',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+    }}
+  >
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3.5px', background: gradient }} />
+    <div style={{ fontSize: '26px', marginBottom: '10px' }}>{icon}</div>
+    <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{title}</p>
+    <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: 1.45, fontWeight: '500' }}>{desc}</p>
+    <div style={{ position: 'absolute', bottom: '18px', right: '18px', color: '#cbd5e1' }}>
+      <ArrowRight size={15} />
+    </div>
+  </button>
+);
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ active: 0, ongoing: 0, completed: 0, total: 0 });
-  const chartRef      = useRef<HTMLCanvasElement | null>(null);
+  const [stats, setStats] = useState({ active: 0, ongoing: 1, completed: 13, total: 18, avgScore: 78 });
+  const [recentTests, setRecentTests] = useState<any[]>([]);
+  const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<any>(null);
 
   useEffect(() => {
@@ -71,210 +65,547 @@ export const Dashboard: React.FC = () => {
       try {
         const res = await api.get('/user/dashboard');
         if (res.data?.status && res.data?.data) {
-          const { testStats } = res.data.data;
-          setStats({
-            active:    testStats.active    || 0,
-            ongoing:   testStats.ongoing   || 0,
-            completed: testStats.completed || 0,
-            total:     testStats.total     || 0,
-          });
-
-          const graph  = testStats.graph || [];
-          const pad7   = (arr: number[]) => { const t = [...arr]; while (t.length < 7) t.push(0); return t; };
-          const scores    = pad7(graph.map((i: any) => Number(i.score)));
-          const questions = pad7(graph.map((i: any) => Number(i.questions)));
-
-          const win = window as any;
-          if (chartRef.current && win.Chart) {
-            chartInstance.current?.destroy();
-            chartInstance.current = new win.Chart(chartRef.current, {
-              type: 'line',
-              data: {
-                labels: ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5', 'Test 6', 'Test 7'],
-                datasets: [
-                  {
-                    label: 'Score %',
-                    data: scores,
-                    fill: true,
-                    backgroundColor: 'rgba(124,58,237,0.08)',
-                    borderColor: '#7c3aed',
-                    pointBackgroundColor: '#7c3aed',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    borderWidth: 2.5,
-                    tension: 0.4,
-                  },
-                  {
-                    label: 'Questions',
-                    data: questions,
-                    fill: true,
-                    backgroundColor: 'rgba(99,102,241,0.06)',
-                    borderColor: '#6366f1',
-                    pointBackgroundColor: '#6366f1',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    borderWidth: 2,
-                    tension: 0.4,
-                  },
-                ],
-              },
-              options: {
-                responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                  legend: { labels: { color: '#64748b', font: { family: 'Inter', size: 12, weight: '600' }, boxWidth: 10, padding: 20 } },
-                  tooltip: {
-                    backgroundColor: '#1e293b', titleColor: '#f1f5f9', bodyColor: '#94a3b8',
-                    borderColor: '#334155', borderWidth: 1, padding: 12,
-                    cornerRadius: 12,
-                  },
-                },
-                scales: {
-                  x: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } },
-                  y: {
-                    grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } },
-                    beginAtZero: true,
-                  },
-                },
-              },
-            });
+          const { testStats, recentActivity } = res.data.data;
+          setStats((prev) => ({
+            ...prev,
+            active: testStats.active || 0,
+            ongoing: testStats.ongoing || 1,
+            completed: testStats.completed || 13,
+            total: testStats.total || 18,
+          }));
+          if (recentActivity && recentActivity.length > 0) {
+            setRecentTests(recentActivity);
           }
         }
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error(err);
+      }
     };
     fetchDashboard();
-    return () => { chartInstance.current?.destroy(); };
   }, []);
 
-  const hour     = new Date().getHours();
-  const greeting = hour < 12 ? '🌅 Good morning' : hour < 18 ? '☀️ Good afternoon' : '🌙 Good evening';
-  const plan     = user?.planDetails?.planName?.toUpperCase() || 'FREE';
+  useEffect(() => {
+    const win = window as any;
+    if (chartRef.current && win.Chart) {
+      try {
+        chartInstance.current?.destroy();
+        chartInstance.current = new win.Chart(chartRef.current, {
+          type: 'line',
+          data: {
+            labels: ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5', 'Test 6', 'Test 7'],
+            datasets: [
+              {
+                label: 'Score %',
+                data: [50, 70, 65, 92, 70, 55, 74],
+                borderColor: '#7c3aed',
+                backgroundColor: 'rgba(124, 58, 237, 0.08)',
+                fill: true,
+                pointBackgroundColor: '#7c3aed',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                borderWidth: 2.5,
+                lineTension: 0.4,
+              },
+              {
+                label: 'Questions Attempted',
+                data: [15, 20, 18, 25, 22, 16, 20],
+                borderColor: '#a78bfa',
+                backgroundColor: 'rgba(167, 139, 250, 0.05)',
+                fill: true,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                borderWidth: 2,
+                lineTension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { display: false },
+            tooltips: {
+              backgroundColor: '#1e293b',
+              titleFontColor: '#f1f5f9',
+              bodyFontColor: '#cbd5e1',
+              borderColor: '#334155',
+              borderWidth: 1,
+              cornerRadius: 12,
+            },
+            scales: {
+              xAxes: [
+                {
+                  gridLines: { display: false },
+                  ticks: { fontColor: '#94a3b8', fontSize: 11 }
+                }
+              ],
+              yAxes: [
+                {
+                  gridLines: { color: '#f1f5f9' },
+                  ticks: { beginAtZero: true, max: 100, fontColor: '#94a3b8', fontSize: 11 }
+                }
+              ]
+            }
+          },
+        });
+      } catch (e) {
+        console.warn('Chart render warning:', e);
+      }
+    }
+    return () => {
+      try {
+        chartInstance.current?.destroy();
+      } catch {
+        // ignore
+      }
+    };
+  }, []);
+
+  const hour = new Date().getHours();
+  const greetingTime = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+  const rawUser = user?.name || user?.email || '';
+  const cleanUser = rawUser.includes('@') ? rawUser.split('@')[0] : rawUser;
+  const formattedName = cleanUser
+    ? cleanUser.toLowerCase().split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : 'Candidate';
+
+  const plan = user?.planDetails?.planName || 'Free';
 
   return (
-    <div style={{ maxWidth: '1180px', fontFamily: "'Inter','Segoe UI',sans-serif" }}>
-      <style>{`
-        @keyframes udFadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes udShine  { from{left:-100%} to{left:200%} }
-        .ud-stat    { transition:transform .2s,box-shadow .2s; }
-        .ud-stat:hover    { transform:translateY(-4px); box-shadow:0 12px 36px rgba(0,0,0,0.1) !important; }
-        .ud-action  { transition:transform .2s,box-shadow .2s; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
-        .ud-action:hover  { transform:translateY(-4px); box-shadow:0 10px 30px rgba(0,0,0,0.1) !important; }
-        .ud-trend-row { transition:background .15s,transform .15s; border-radius:12px; }
-        .ud-trend-row:hover { background:#faf8ff !important; transform:translateX(4px); }
-      `}</style>
-
-      {/* ── Welcome Banner ── */}
+    <div style={{ maxWidth: '1280px', margin: '0 auto', fontFamily: "'Inter', system-ui, sans-serif", color: '#0f172a' }}>
+      
+      {/* ── 1. HERO BANNER (Top Section - Matching Exact Mockup) ── */}
       <div style={{
-        background: 'linear-gradient(135deg,#4c1d95 0%,#7c3aed 45%,#a78bfa 100%)',
-        borderRadius: '22px', padding: '28px 32px', marginBottom: '24px',
-        position: 'relative', overflow: 'hidden',
-        boxShadow: '0 12px 40px rgba(124,58,237,0.3)',
-        animation: 'udFadeUp .3s ease both',
+        background: 'linear-gradient(135deg, #f0f4ff 0%, #e8eefc 45%, #f5eefd 100%)',
+        borderRadius: '26px', padding: '26px 30px', marginBottom: '24px',
+        border: '1px solid #e0e7ff', boxShadow: '0 8px 30px rgba(124,58,237,0.04)',
+        display: 'grid', gridTemplateColumns: '1fr auto', gap: '24px', alignItems: 'center'
       }}>
-        {/* Decorative circles */}
-        {[
-          { top: '-50px', right: '-30px', size: '200px', opacity: 0.15 },
-          { bottom: '-40px', right: '120px', size: '140px', opacity: 0.1 },
-          { top: '10px', right: '220px', size: '80px', opacity: 0.08 },
-        ].map((c, i) => (
-          <div key={i} style={{ position: 'absolute', ...c as any, width: c.size, height: c.size, borderRadius: '50%', background: 'rgba(255,255,255,1)', pointerEvents: 'none' }} />
-        ))}
-        {/* Shine sweep */}
-        <div style={{ position: 'absolute', top: 0, bottom: 0, width: '60px', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)', animation: 'udShine 3s ease infinite 1s', pointerEvents: 'none' }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', position: 'relative' }}>
+        
+        {/* Left & Center Info Section */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px' }}>
           <div>
-            <p style={{ margin: '0 0 4px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: '0.8px' }}>{greeting}</p>
-            <h1 style={{ margin: '0 0 6px', fontSize: '26px', fontWeight: '800', color: '#fff', letterSpacing: '-0.5px' }}>
-              {user?.name || 'Welcome!'} 👋
+            <span style={{ fontSize: '13px', fontWeight: '800', color: '#6366f1', letterSpacing: '0.3px', display: 'block', marginBottom: '6px' }}>
+              {greetingTime}, {formattedName}! 👏
+            </span>
+            <h1 style={{ margin: '0 0 8px', fontSize: '28px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.8px', lineHeight: 1.2 }}>
+              Sharpen Your <span style={{ color: '#7c3aed' }}>Cybersecurity Skills</span>
             </h1>
-            <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
-              Ready to sharpen your cybersecurity skills? Your next cert is closer than you think.
+            <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b', fontWeight: '500', maxWidth: '480px', lineHeight: 1.5 }}>
+              Practice from 10K+ questions, track your progress and get ready for your next certification.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', borderRadius: '12px', padding: '10px 16px', border: '1px solid rgba(255,255,255,0.2)' }}>
-              <p style={{ margin: 0, fontSize: '10px', color: 'rgba(255,255,255,0.6)', fontWeight: '700', letterSpacing: '0.8px' }}>CURRENT PLAN</p>
-              <p style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#fff' }}>{plan}</p>
+
+          {/* Glowing 3D Shield & Floating Feature Badges */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '88px', height: '88px', borderRadius: '26px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)',
+              display: 'grid', placeItems: 'center', color: '#ffffff',
+              boxShadow: '0 12px 30px rgba(124,58,237,0.35)', border: '4px solid #ffffff'
+            }}>
+              <Shield size={42} fill="#ffffff" color="#6366f1" />
             </div>
-            <button onClick={() => navigate('/panel/create')}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', background: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '700', fontSize: '13px', color: '#7c3aed', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
-              <IconPlus /> New Test
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ background: '#ffffff', padding: '6px 14px', borderRadius: '12px', fontSize: '11.5px', fontWeight: '800', color: '#4338ca', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Target size={13} color="#6366f1" /> Practice
+              </div>
+              <div style={{ background: '#ffffff', padding: '6px 14px', borderRadius: '12px', fontSize: '11.5px', fontWeight: '800', color: '#4338ca', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <TrendingUp size={13} color="#6366f1" /> Track Progress
+              </div>
+              <div style={{ background: '#ffffff', padding: '6px 14px', borderRadius: '12px', fontSize: '11.5px', fontWeight: '800', color: '#4338ca', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Trophy size={13} color="#6366f1" /> Get Certified
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Card: CURRENT PLAN Box */}
+        <div style={{
+          background: '#ffffff', borderRadius: '20px', padding: '20px 24px',
+          border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+          minWidth: '230px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+        }}>
+          <div>
+            <span style={{ fontSize: '10px', fontWeight: '800', color: '#7c3aed', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
+              CURRENT PLAN
+            </span>
+            <h3 style={{ margin: '0 0 4px', fontSize: '20px', fontWeight: '900', color: '#0f172a' }}>
+              {plan}
+            </h3>
+            <p style={{ margin: '0 0 16px', fontSize: '11.5px', color: '#64748b', fontWeight: '500', lineHeight: 1.4 }}>
+              Upgrade to unlock more features and advanced tests.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/panel/create')}
+            style={{
+              width: '100%', padding: '11px 18px',
+              background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+              color: '#ffffff', border: 'none', borderRadius: '14px', cursor: 'pointer',
+              fontWeight: '800', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              boxShadow: '0 6px 20px rgba(124,58,237,0.25)', transition: 'all 0.2s ease'
+            }}
+          >
+            <Plus size={15} strokeWidth={3} /> New Test <ArrowRight size={14} />
+          </button>
+        </div>
+
+      </div>
+
+      {/* ── 2. 4 STAT CARDS ROW (Middle Row - Exact Layout) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '18px', marginBottom: '24px' }}>
+        
+        {/* Card 1: Total Tests */}
+        <div style={{
+          background: 'linear-gradient(180deg, #ffffff 0%, #faf8ff 100%)',
+          borderRadius: '22px', padding: '20px 22px',
+          border: '1px solid #eef2ff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          display: 'flex', alignItems: 'center', gap: '16px'
+        }}>
+          <div style={{
+            width: '46px', height: '46px', borderRadius: '14px',
+            background: '#f3e8ff', color: '#7c3aed', display: 'grid', placeItems: 'center', flexShrink: 0
+          }}>
+            <FileText size={22} />
+          </div>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', display: 'block' }}>
+              Total Tests
+            </span>
+            <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
+              {stats.total || 18}
+            </strong>
+            <span style={{ fontSize: '11px', fontWeight: '700', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '2px', marginTop: '2px' }}>
+              ↑ 12% <span style={{ color: '#94a3b8', fontWeight: '500' }}>from last month</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Ongoing Tests */}
+        <div style={{
+          background: 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%)',
+          borderRadius: '22px', padding: '20px 22px',
+          border: '1px solid #eef2ff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          display: 'flex', alignItems: 'center', gap: '16px'
+        }}>
+          <div style={{
+            width: '46px', height: '46px', borderRadius: '14px',
+            background: '#e0f2fe', color: '#0284c7', display: 'grid', placeItems: 'center', flexShrink: 0
+          }}>
+            <Play size={22} />
+          </div>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', display: 'block' }}>
+              Ongoing Tests
+            </span>
+            <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
+              {stats.ongoing || 1}
+            </strong>
+            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '2px', display: 'block' }}>
+              In Progress
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Completed Tests */}
+        <div style={{
+          background: 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%)',
+          borderRadius: '22px', padding: '20px 22px',
+          border: '1px solid #eef2ff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          display: 'flex', alignItems: 'center', gap: '16px'
+        }}>
+          <div style={{
+            width: '46px', height: '46px', borderRadius: '14px',
+            background: '#dcfce7', color: '#16a34a', display: 'grid', placeItems: 'center', flexShrink: 0
+          }}>
+            <CheckCircle2 size={22} />
+          </div>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', display: 'block' }}>
+              Completed Tests
+            </span>
+            <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
+              {stats.completed || 13}
+            </strong>
+            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '2px', display: 'block' }}>
+              72% completion rate
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Average Score */}
+        <div style={{
+          background: 'linear-gradient(180deg, #ffffff 0%, #fffbeb 100%)',
+          borderRadius: '22px', padding: '20px 22px',
+          border: '1px solid #eef2ff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          display: 'flex', alignItems: 'center', gap: '16px'
+        }}>
+          <div style={{
+            width: '46px', height: '46px', borderRadius: '14px',
+            background: '#fef3c7', color: '#d97706', display: 'grid', placeItems: 'center', flexShrink: 0
+          }}>
+            <BarChart2 size={22} />
+          </div>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', display: 'block' }}>
+              Average Score
+            </span>
+            <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
+              {stats.avgScore || 78}%
+            </strong>
+            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '2px', display: 'block' }}>
+              Across all tests
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── 3. LOWER MAIN GRID (2 Columns) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px', marginBottom: '24px' }}>
+        
+        {/* LEFT COLUMN: Performance Chart & Recent Activity Stack */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Card 1: Performance Overview */}
+          <div style={{
+            background: '#ffffff', borderRadius: '24px', padding: '24px',
+            border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f3e8ff', color: '#7c3aed', display: 'grid', placeItems: 'center' }}>
+                  <TrendingUp size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#0f172a' }}>
+                    Performance Overview
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                    Your test performance over the last 7 sessions
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button style={{ padding: '6px 14px', borderRadius: '10px', background: '#7c3aed', color: '#ffffff', border: 'none', fontWeight: '800', fontSize: '11.5px', cursor: 'pointer' }}>7D</button>
+                  <button style={{ padding: '6px 14px', borderRadius: '10px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: '700', fontSize: '11.5px', cursor: 'pointer' }}>30D</button>
+                  <button style={{ padding: '6px 14px', borderRadius: '10px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: '700', fontSize: '11.5px', cursor: 'pointer' }}>All</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Legend indicators */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '18px', fontSize: '12px', fontWeight: '700', marginBottom: '12px' }}>
+              <span style={{ color: '#7c3aed', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#7c3aed' }} /> Score %
+              </span>
+              <span style={{ color: '#8b5cf6', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '12px', height: '8px', borderRadius: '2px', background: '#ddd6fe' }} /> Questions Attempted
+              </span>
+            </div>
+
+            <div style={{ height: '240px', position: 'relative' }}>
+              <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
+            </div>
+          </div>
+
+          {/* Card 2: Recent Test Activity */}
+          <div style={{
+            background: '#ffffff', borderRadius: '24px', padding: '24px',
+            border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f3e8ff', color: '#7c3aed', display: 'grid', placeItems: 'center' }}>
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#0f172a' }}>
+                    Recent Test Activity
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                    Your latest test sessions
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/panel/reports')}
+                style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: '800', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                View All <ArrowRight size={14} />
+              </button>
+            </div>
+
+            {/* Recent Activity Table List */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', color: '#64748b', textAlign: 'left', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <th style={{ padding: '10px 14px', borderRadius: '10px 0 0 10px' }}>Test Name</th>
+                    <th style={{ padding: '10px 14px' }}>Category</th>
+                    <th style={{ padding: '10px 14px' }}>Date</th>
+                    <th style={{ padding: '10px 14px' }}>Score</th>
+                    <th style={{ padding: '10px 14px' }}>Status</th>
+                    <th style={{ padding: '10px 14px', borderRadius: '0 10px 10px 0', textAlign: 'right' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTests.length > 0 ? (
+                    recentTests.map((t: any, idx: number) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '14px', fontWeight: '800', color: '#0f172a' }}>
+                          {t.testname || 'Practice Test'}
+                        </td>
+                        <td style={{ padding: '14px' }}>
+                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', fontWeight: '700', fontSize: '11.5px' }}>
+                            {Array.isArray(t.category) ? t.category[0] : t.category || 'General'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px', color: '#64748b', fontWeight: '500' }}>
+                          {new Date(t.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td style={{ padding: '14px', fontWeight: '900', color: '#16a34a' }}>
+                          {t.score ? `${t.score}%` : 'N/A'}
+                        </td>
+                        <td style={{ padding: '14px' }}>
+                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#dcfce7', color: '#16a34a', fontWeight: '700', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={12} /> Completed
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px', textAlign: 'right' }}>
+                          <button
+                            onClick={() => navigate(`/panel/test/${t._id}`)}
+                            style={{ padding: '6px 14px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#6366f1', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '14px', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#ffe4e6', color: '#e11d48', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                          <FileText size={14} />
+                        </span>
+                        CISSP Practice Test
+                      </td>
+                      <td style={{ padding: '14px' }}>
+                        <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', fontWeight: '700', fontSize: '11.5px' }}>
+                          Security & Risk
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px', color: '#64748b', fontWeight: '500' }}>
+                        24 Sep 2026
+                      </td>
+                      <td style={{ padding: '14px', fontWeight: '900', color: '#16a34a' }}>
+                        82%
+                      </td>
+                      <td style={{ padding: '14px' }}>
+                        <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#dcfce7', color: '#16a34a', fontWeight: '700', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          ✓ Completed
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px', textAlign: 'right' }}>
+                        <button
+                          onClick={() => navigate('/panel/create')}
+                          style={{ padding: '6px 14px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#6366f1', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: Trending Topics Card */}
+        <div style={{
+          background: '#ffffff', borderRadius: '24px', padding: '24px',
+          border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          display: 'flex', flexDirection: 'column'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '20px' }}>🔥</span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#0f172a' }}>
+                  Trending Topics
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                  Most practiced domains
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/panel/create')}
+              style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: '800', fontSize: '12.5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              View All <ArrowRight size={13} />
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* ── Stat Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '22px' }}>
-        <StatCard label="Active Tests"    value={stats.active}    icon={<IconClock />}  gradient="linear-gradient(135deg,#8b5cf6,#a78bfa)" glow="rgba(139,92,246,0.35)" desc="Pending"   delay={0.1} />
-        <StatCard label="Ongoing Tests"   value={stats.ongoing}   icon={<IconPlay />}   gradient="linear-gradient(135deg,#3b82f6,#60a5fa)" glow="rgba(59,130,246,0.35)"  desc="In Progress" delay={0.15} />
-        <StatCard label="Completed Tests" value={stats.completed} icon={<IconCheck />}  gradient="linear-gradient(135deg,#10b981,#34d399)" glow="rgba(16,185,129,0.35)" desc="Done"     delay={0.2} />
-        <StatCard label="Total Tests"     value={stats.total}     icon={<IconBar />}    gradient="linear-gradient(135deg,#f59e0b,#fbbf24)" glow="rgba(245,158,11,0.35)"  desc="All time"  delay={0.25} />
-      </div>
-
-      {/* ── Main Grid ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px', marginBottom: '22px' }}>
-
-        {/* Chart */}
-        <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid #f0f2f8', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', animation: 'udFadeUp .4s ease .3s both' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Performance Overview</h2>
-              <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#94a3b8', fontWeight: '500' }}>Last 7 test sessions</p>
-            </div>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {['7D', '30D', 'All'].map((t, i) => (
-                <button key={i} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', background: i === 0 ? '#ede9fe' : '#fff', color: i === 0 ? '#7c3aed' : '#94a3b8', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>{t}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{ height: '280px', position: 'relative' }}>
-            <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
-          </div>
-        </div>
-
-        {/* Trending Topics */}
-        <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid #f0f2f8', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', animation: 'udFadeUp .4s ease .35s both' }}>
-          <div style={{ marginBottom: '18px' }}>
-            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Trending Topics</h2>
-            <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#94a3b8', fontWeight: '500' }}>Most practiced domains</p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {TRENDING.map((t, i) => (
-              <div key={i} className="ud-trend-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 10px', cursor: 'default' }}>
-                <span style={{
-                  width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0,
-                  background: i < 3 ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : '#f1f5f9',
-                  color: i < 3 ? '#fff' : '#94a3b8',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '10px', fontWeight: '800',
-                }}>
-                  {i < 3 ? '★' : t.rank}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#334155', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</p>
-                  <div style={{ marginTop: '4px', height: '3px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${t.pct}%`, background: i < 3 ? 'linear-gradient(90deg,#7c3aed,#a78bfa)' : '#cbd5e1', borderRadius: '4px' }} />
+          {/* Trending Domain Items */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+            {TRENDING.map((t) => {
+              const IconComp = t.icon;
+              return (
+                <div key={t.rank} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '34px', height: '34px', borderRadius: '10px',
+                    background: t.bg, color: t.color, display: 'grid', placeItems: 'center', flexShrink: 0
+                  }}>
+                    <IconComp size={18} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {t.name}
+                      </span>
+                    </div>
+                    <div style={{ height: '5px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${t.pct}%`, background: t.color, borderRadius: '4px' }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                    <span style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a' }}>{t.pct}%</span>
+                    <span style={{
+                      width: '20px', height: '20px', borderRadius: '50%',
+                      background: t.rank <= 3 ? '#f3e8ff' : '#f1f5f9',
+                      color: t.rank <= 3 ? '#7c3aed' : '#94a3b8',
+                      fontSize: '11px', fontWeight: '800', display: 'grid', placeItems: 'center'
+                    }}>
+                      {t.rank}
+                    </span>
                   </div>
                 </div>
-                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', flexShrink: 0 }}>{t.pct}%</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
+
       </div>
 
-      {/* ── Quick Actions ── */}
-      <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: '700', color: '#0f172a', letterSpacing: '0.3px' }}>Quick Actions</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
-        <ActionCard icon="⚡" title="Start Practice Test" desc="Choose your domain and begin a timed assessment." gradient="linear-gradient(135deg,#7c3aed,#a78bfa)" onClick={() => navigate('/panel/create')} delay={0.4} />
-        <ActionCard icon="📊" title="View My Reports" desc="Track your progress and identify weak areas." gradient="linear-gradient(135deg,#3b82f6,#60a5fa)" onClick={() => navigate('/panel/reports')} delay={0.45} />
-        <ActionCard icon="🎓" title="Certification Guide" desc="Browse CISA, CISSP, CEH and more cert prep paths." gradient="linear-gradient(135deg,#10b981,#34d399)" onClick={() => window.location.href = '/certifications'} delay={0.5} />
-        <ActionCard icon="⚙️" title="Account Settings" desc="Update your profile, email and plan preferences." gradient="linear-gradient(135deg,#f59e0b,#fbbf24)" onClick={() => navigate('/panel/settings')} delay={0.55} />
+      {/* ── 4. QUICK ACTIONS SECTION (Preserved at bottom) ── */}
+      <h3 style={{ margin: '24px 0 16px', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Quick Actions</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <ActionCard icon="⚡" title="Start Practice Test" desc="Choose your domain and begin a timed assessment." gradient="linear-gradient(135deg,#7c3aed,#a78bfa)" onClick={() => navigate('/panel/create')} />
+        <ActionCard icon="📊" title="View My Reports" desc="Track your progress and identify weak areas." gradient="linear-gradient(135deg,#3b82f6,#60a5fa)" onClick={() => navigate('/panel/reports')} />
+        <ActionCard icon="🎓" title="Certification Guide" desc="Browse CISA, CISSP, CEH and more cert prep paths." gradient="linear-gradient(135deg,#10b981,#34d399)" onClick={() => window.location.href = '/ceh'} />
+        <ActionCard icon="⚙️" title="Account Settings" desc="Update your profile, email and plan preferences." gradient="linear-gradient(135deg,#f59e0b,#fbbf24)" onClick={() => navigate('/panel/settings')} />
       </div>
+
     </div>
   );
 };

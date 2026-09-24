@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import {
   CheckCircle2,
   XCircle,
@@ -20,8 +21,14 @@ import {
   Clock as ClockIcon,
   ChevronRight,
   ArrowRight,
-  Flag
+  Flag,
+  User,
+  FileQuestion,
+  ShieldCheck,
+  Bookmark,
+  Check
 } from 'lucide-react';
+import learnerImage from '../../../../pixel-perfect-path-47/src/assets/csqna-learner.png';
 
 /* ─── helpers ────────────────────────────────────────────────────────────────── */
 const getOptionsArray = (options: any): { key: string; text: string }[] => {
@@ -56,6 +63,7 @@ const LABELS = ['A', 'B', 'C', 'D', 'E'];
 export const PracticeTest: React.FC = () => {
   const { testId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [testData, setTestData]             = useState<any>(null);
   const [currentIdx, setCurrentIdx]         = useState(0);
@@ -68,6 +76,7 @@ export const PracticeTest: React.FC = () => {
   const [reportData, setReportData]         = useState<any>(null);
   const [errorMessage, setErrorMessage]     = useState('');
   const [showReview, setShowReview]         = useState(false);
+  const [partialNotice, setPartialNotice]   = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -112,6 +121,7 @@ export const PracticeTest: React.FC = () => {
   }, [remainingTime, reportData]);
 
   const handleOptionSelect = async (qId: string, optText: string, isMulti = false) => {
+    if (partialNotice) setPartialNotice(null);
     let cur = selectedAnswers[qId] || [];
     if (isMulti) {
       cur = cur.includes(optText) ? cur.filter(a => a !== optText) : [...cur, optText];
@@ -135,6 +145,13 @@ export const PracticeTest: React.FC = () => {
     const qId = cq._id;
     const curAns = selectedAnswers[qId] || [];
 
+    if (!curAns || curAns.length === 0) {
+      setPartialNotice('Please select an option to mark as Partial Answer');
+      setTimeout(() => setPartialNotice(null), 4000);
+      return;
+    }
+
+    setPartialNotice(null);
     const newStatus = 'Partial Answer';
     setAnswerStatuses(prev => ({ ...prev, [qId]: newStatus }));
 
@@ -148,6 +165,7 @@ export const PracticeTest: React.FC = () => {
   };
 
   const handleNext = async () => {
+    if (partialNotice) setPartialNotice(null);
     if (!testData?.testQuestions?.[currentIdx]) return;
     const cq = testData.testQuestions[currentIdx];
     const qId = cq._id;
@@ -224,6 +242,13 @@ export const PracticeTest: React.FC = () => {
     const passed     = scoreVal >= 70;
     const accuracy   = totalQ > 0 ? Math.round((correct / totalQ) * 100) : 0;
     
+    const initialDuration = (testData?.duration || 40) * 60;
+    const timeTakenSec = Math.max(10, initialDuration - remainingTime);
+    const timeTakenMins = Math.floor(timeTakenSec / 60);
+    const timeTakenSecs = timeTakenSec % 60;
+    const formattedTimeTaken = `${timeTakenMins > 0 ? `${timeTakenMins} min ` : ''}${timeTakenSecs} sec`;
+    const userName = user?.name || user?.username || 'Student User';
+
     const statusColor = passed ? '#16a34a' : scoreVal >= 50 ? '#d97706' : '#e11d48';
     const statusBg   = passed ? '#f0fdf4' : scoreVal >= 50 ? '#fffbeb' : '#ffe4e6';
     const statusBorder = passed ? '#bbf7d0' : scoreVal >= 50 ? '#fde68a' : '#fecdd3';
@@ -233,42 +258,46 @@ export const PracticeTest: React.FC = () => {
 
     const getDomainPerformance = () => {
       const questions = testData?.testQuestions || [];
-      if (!questions.length) return [];
+      const CSQNA_CERTS = [
+        { key: 'CISA', label: 'CISA', keywords: ['cisa', 'auditor', 'audit', 'governance'] },
+        { key: 'CEH', label: 'CEH', keywords: ['ceh', 'ethical', 'hacker', 'penetration', 'security', 'incident'] },
+        { key: 'CIPP', label: 'CIPP', keywords: ['cipp', 'privacy professional'] },
+        { key: 'DPDP', label: 'DPDP', keywords: ['dpdp', 'data protection', 'privacy officer'] },
+        { key: 'ISO 27001', label: 'ISO 27001', keywords: ['iso', '27001', 'isms', 'management system'] },
+        { key: 'AAIA', label: 'AAIA', keywords: ['aaia', 'ai', 'artificial intelligence', 'fundamentals'] },
+      ];
 
-      const categoryMap: Record<string, { total: number; correct: number }> = {};
+      const certScores: Record<string, { total: number; correct: number }> = {};
+      CSQNA_CERTS.forEach(c => { certScores[c.key] = { total: 0, correct: 0 }; });
+
+      const testTitle = (testData?.testname || testData?.category || testData?.title || '').toLowerCase();
 
       questions.forEach((q: any) => {
-        const rawCat = (
-          q.category ||
-          q.domain ||
-          q.topic ||
-          q.subject ||
-          q.categoryName ||
-          testData?.category ||
-          'General'
-        ).toString().trim();
-
-        if (!categoryMap[rawCat]) {
-          categoryMap[rawCat] = { total: 0, correct: 0 };
-        }
-        categoryMap[rawCat].total += 1;
-
+        const qCat = (q.category || q.domain || q.certificate || q.topic || q.subject || '').toString().toLowerCase();
         const uAns = selectedAnswers[q._id] || (Array.isArray(q.userAnswer) ? q.userAnswer : q.userAnswer ? [q.userAnswer] : []);
         const cAns = Array.isArray(q.correctAnswer) ? q.correctAnswer : q.correctAnswer !== undefined ? [q.correctAnswer] : [];
         const isCorr = cAns.length > 0 && uAns.length === cAns.length && uAns.every((a: string) => cAns.includes(a));
 
-        if (isCorr) {
-          categoryMap[rawCat].correct += 1;
+        let matched = false;
+        CSQNA_CERTS.forEach(c => {
+          if (c.keywords.some(kw => qCat.includes(kw) || testTitle.includes(kw))) {
+            certScores[c.key].total += 1;
+            if (isCorr) certScores[c.key].correct += 1;
+            matched = true;
+          }
+        });
+
+        if (!matched) {
+          certScores['AAIA'].total += 1;
+          if (isCorr) certScores['AAIA'].correct += 1;
         }
       });
 
-      const categories = Object.keys(categoryMap);
-
-      return categories.map((catName, idx) => {
-        const data = categoryMap[catName];
+      return CSQNA_CERTS.map((c, idx) => {
+        const data = certScores[c.key];
         const pct = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
         return {
-          name: catName,
+          name: c.label,
           color: PALETTE[idx % PALETTE.length],
           total: data.total,
           correct: data.correct,
@@ -365,8 +394,9 @@ export const PracticeTest: React.FC = () => {
         <style>{`
           @keyframes ptFadeUp  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
           .pt-ss3-card        { animation: ptFadeUp .4s ease both; }
-          .pt-ss3-btn         { transition: all .2s ease; cursor: pointer; }
-          .pt-ss3-btn:hover   { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06) !important; }
+          .pt-ss3-btn         { transition: all .25s ease; cursor: pointer; }
+          .pt-ss3-btn:hover   { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important; border-color: transparent !important; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.25) !important; }
+          .pt-ss3-btn:hover h4, .pt-ss3-btn:hover p, .pt-ss3-btn:hover svg { color: #ffffff !important; }
           .pt-ss3-next-step   { transition: all .2s ease; cursor: pointer; }
           .pt-ss3-next-step:hover { transform: translateY(-3px); border-color: #6366f1 !important; box-shadow: 0 8px 24px rgba(99,102,241,0.08) !important; }
         `}</style>
@@ -411,147 +441,194 @@ export const PracticeTest: React.FC = () => {
               color: '#4338ca', fontSize: '11px', fontWeight: '800', letterSpacing: '0.8px',
               marginBottom: '12px'
             }}>
-              <CheckCircle2 size={14} /> ASSESSMENT COMPLETE
+              <CheckCircle2 size={14} /> PRACTICE TEST REPORT
             </span>
-            <h1 style={{ margin: '0 0 8px', fontSize: '28px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.5px' }}>
-              {testData?.testname || 'PRACTICE_TEST_1789797814323'}
+            <h1 style={{ margin: '0 0 14px', fontSize: '26px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.5px' }}>
+              PRACTICE TEST REPORT (Ref: {testData?.testname || testId})
             </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12.5px', color: '#64748b', fontWeight: '500' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Calendar size={14} style={{ color: '#6366f1' }} />
-                Completed on {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12.5px', color: '#475569', fontWeight: '600', flexWrap: 'wrap' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '6px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+                <User size={15} style={{ color: '#6366f1' }} />
+                <span>User Name:</span> <strong style={{ color: '#0f172a' }}>{userName}</strong>
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ClockIcon size={14} style={{ color: '#6366f1' }} />
-                Time Taken: --
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '6px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+                <Calendar size={15} style={{ color: '#6366f1' }} />
+                <span>Test Completed on:</span> <strong style={{ color: '#0f172a' }}>{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ClipboardList size={14} style={{ color: '#6366f1' }} />
-                {totalQ} Questions
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '6px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+                <ClockIcon size={15} style={{ color: '#6366f1' }} />
+                <span>Time Taken:</span> <strong style={{ color: '#0f172a' }}>{formattedTimeTaken}</strong>
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '6px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+                <ClipboardList size={15} style={{ color: '#6366f1' }} />
+                <span>No of Questions:</span> <strong style={{ color: '#0f172a' }}>{totalQ}</strong>
               </span>
             </div>
           </div>
 
-          {/* 2-Column Hero Body */}
-          <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', marginBottom: '24px' }}>
-            
-            {/* LEFT: Donut Readiness & Score Badge */}
+          {/* ── Full Width DashboardVisual Card Container (Fills Hero Parent Container) ── */}
+          <div style={{ width: '100%', position: 'relative', zIndex: 10, marginTop: '8px' }}>
+            {/* Ambient Soft Blur Aura */}
             <div style={{
-              background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)',
-              borderRadius: '20px', padding: '28px 24px', border: '1px solid #e2e8f0',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center'
-            }}>
-              <div style={{ position: 'relative', width: '190px', height: '190px', marginBottom: '16px' }}>
-                <ScoreRing pct={scoreVal} passed={passed} />
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '42px', fontWeight: '900', color: statusColor, lineHeight: 1, letterSpacing: '-1.5px' }}>
-                    {scoreVal}%
-                  </span>
-                  <span style={{ fontSize: '10px', color: '#64748b', letterSpacing: '1px', fontWeight: '800', marginTop: '6px' }}>OVERALL READINESS</span>
-                </div>
-              </div>
+              position: 'absolute', inset: '-14px', borderRadius: '30px',
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(37, 99, 235, 0.12) 100%)',
+              filter: 'blur(28px)', pointerEvents: 'none'
+            }} />
 
-              <div style={{ width: '100%', textAlign: 'center' }}>
-                <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#64748b' }}>
-                  Your Score
-                </p>
-                <p style={{ margin: '0 0 10px', fontSize: '28px', fontWeight: '900', color: '#0f172a' }}>
-                  {Math.round((scoreVal / 100) * totalQ * 4)} / 100
-                </p>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '6px',
-                    padding: '6px 20px', borderRadius: '30px',
-                    background: statusBg, border: `1px solid ${statusBorder}`,
-                    color: statusColor, fontWeight: '800', fontSize: '12px', letterSpacing: '0.5px'
+            {/* DashboardVisual Glassmorphic Card */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(255, 255, 255, 0.94)',
+                padding: '32px',
+                boxShadow: '0 24px 60px -12px rgba(37, 99, 235, 0.16), 0 10px 28px -6px rgba(99, 102, 241, 0.1)',
+                backdropFilter: 'blur(16px)',
+              }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '24px' }}>
+                
+                {/* Score Box */}
+                <div style={{
+                  borderRadius: '20px', backgroundColor: '#ffffff',
+                  padding: '24px', border: '1px solid #f1f5f9',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                  <p style={{ margin: 0, fontSize: '11.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', width: '100%', textAlign: 'left' }}>
+                    Score
+                  </p>
+                  <div style={{
+                    margin: '18px auto 8px', width: '135px', height: '135px', borderRadius: '50%',
+                    background: `conic-gradient(${statusColor} 0% ${scoreVal}%, #f1f5f9 ${scoreVal}% 100%)`,
+                    padding: '12px', boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.06)',
+                    display: 'grid', placeItems: 'center'
                   }}>
-                    {passed ? <><CheckCircle2 size={14} /> PASSED</> : scoreVal >= 50 ? <><AlertCircle size={14} /> AVERAGE</> : <><XCircle size={14} /> NEEDS IMPROVEMENT</>}
-                  </span>
-                </div>
-
-                <p style={{ margin: '0 auto', fontSize: '11.5px', color: '#64748b', lineHeight: 1.5, maxWidth: '250px' }}>
-                  {passed ? 'Great work! You have passed this assessment.' : 'This is a great starting point! Review the questions and keep practicing to build your cybersecurity skills.'}
-                </p>
-              </div>
-            </div>
-
-            {/* RIGHT: Large White Card Container */}
-            <div style={{
-              background: '#ffffff', borderRadius: '20px', padding: '24px',
-              border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-              display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
-            }}>
-              {/* Top Row: Domain Performance & Accuracy */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                {/* DOMAIN PERFORMANCE */}
-                <div style={{ padding: '4px' }}>
-                  <h4 style={{ margin: '0 0 14px', fontSize: '11px', fontWeight: '800', color: '#1e1b4b', letterSpacing: '1px' }}>
-                    DOMAIN PERFORMANCE
-                  </h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ flexShrink: 0 }}>
-                      <RenderRadarChart stats={domainStats} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                      {domainStats.map((d, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: '600', color: '#334155' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: d.color }} />
-                            <span>{d.name}</span>
-                          </div>
-                          <span style={{ fontWeight: '800', color: '#0f172a' }}>{d.pct}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* ACCURACY RATE */}
-                <div style={{ padding: '4px', borderLeft: '1px solid #f1f5f9', paddingLeft: '20px' }}>
-                  <h4 style={{ margin: '0 0 16px', fontSize: '11px', fontWeight: '800', color: '#1e1b4b', letterSpacing: '1px' }}>
-                    ACCURACY RATE
-                  </h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{
-                      width: '52px', height: '52px', borderRadius: '50%',
-                      background: '#fff1f2', border: '1px solid #fecdd3',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      width: '100%', height: '100%', borderRadius: '50%',
+                      backgroundColor: '#ffffff', display: 'grid', placeItems: 'center',
+                      fontSize: '32px', fontWeight: '900', color: '#0f172a'
                     }}>
-                      <Target size={26} color="#e11d48" />
+                      {Math.round(scoreVal)}%
                     </div>
-                    <div>
-                      <div style={{ fontSize: '32px', fontWeight: '900', color: '#0f172a', lineHeight: 1 }}>
-                        {accuracy}%
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', marginTop: '4px' }}>
-                        {correct} correct out of {totalQ}
-                      </div>
+                  </div>
+                </div>
+
+                {/* Score-at-a-glance Box */}
+                <div style={{
+                  borderRadius: '20px', backgroundColor: '#ffffff',
+                  padding: '24px', border: '1px solid #f1f5f9',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+                }}>
+                  <p style={{ margin: 0, fontSize: '11.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b' }}>
+                    Score-at-a-glance
+                  </p>
+                  <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '20px' }}>
+                    <RenderRadarChart stats={domainStats} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', fontWeight: '700', color: '#64748b', lineHeight: 1.3 }}>
+                      {domainStats && domainStats.length > 0 ? (
+                        domainStats.map((item) => (
+                          <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '12px', whiteSpace: 'nowrap' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: item.color, flexShrink: 0 }} />
+                            <span style={{ color: '#1e293b', fontWeight: '700' }}>{item.name}</span>
+                            <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: '900', marginLeft: 'auto' }}>{item.pct}%</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '12px', color: '#94a3b8' }}>No certificate data</div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Row: 4 Stat Boxes inside Card */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-                {[
-                  { label: 'QUESTIONS PRACTICED', val: totalQ, sub: 'Total Questions', icon: <ClipboardList size={22} color="#1d4ed8" />, bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8' },
-                  { label: 'CORRECT', val: correct, sub: 'Answered Correctly', icon: <CheckCircle2 size={22} color="#15803d" />, bg: '#f0fdf4', border: '#bbf7d0', color: '#15803d' },
-                  { label: 'INCORRECT', val: wrong, sub: 'Answered Incorrectly', icon: <XCircle size={22} color="#b91c1c" />, bg: '#fef2f2', border: '#fecaca', color: '#b91c1c' },
-                  { label: 'TESTS COMPLETED', val: 1, sub: 'Total Tests Taken', icon: <Trophy size={22} color="#b45309" />, bg: '#fffbeb', border: '#fde68a', color: '#b45309' },
-                ].map((st, i) => (
-                  <div key={i} style={{ background: st.bg, border: `1px solid ${st.border}`, borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{st.icon}</div>
-                    <div>
-                      <h5 style={{ margin: 0, fontSize: '9.5px', fontWeight: '800', color: st.color, letterSpacing: '0.5px' }}>{st.label}</h5>
-                      <p style={{ margin: '2px 0 0', fontSize: '20px', fontWeight: '900', color: '#0f172a', lineHeight: 1 }}>{st.val}</p>
-                      <p style={{ margin: '2px 0 0', fontSize: '10px', color: '#64748b', fontWeight: '500' }}>{st.sub}</p>
-                    </div>
+              <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                {/* Questions Practiced */}
+                <div style={{
+                  borderRadius: '16px', backgroundColor: '#ffffff',
+                  padding: '14px 16px', border: '1px solid #f1f5f9',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: '12px'
+                }}>
+                  <span style={{
+                    width: '38px', height: '38px', borderRadius: '10px',
+                    backgroundColor: '#eff6ff', color: '#2563eb', display: 'grid', placeItems: 'center', flexShrink: 0
+                  }}>
+                    <FileQuestion size={18} />
+                  </span>
+                  <div>
+                    <small style={{ display: 'block', fontSize: '8.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b' }}>
+                      Questions Practiced
+                    </small>
+                    <b style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block', marginTop: '2px' }}>
+                      {reportData?.questionsPracticed || reportData?.totalQuestionsPracticed || user?.questionsPracticed || totalQ}
+                    </b>
                   </div>
-                ))}
+                </div>
+
+                {/* Correct */}
+                <div style={{
+                  borderRadius: '16px', backgroundColor: '#ffffff',
+                  padding: '14px 16px', border: '1px solid #f1f5f9',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: '12px'
+                }}>
+                  <span style={{
+                    width: '38px', height: '38px', borderRadius: '10px',
+                    backgroundColor: '#f0fdf4', color: '#16a34a', display: 'grid', placeItems: 'center', flexShrink: 0
+                  }}>
+                    <CheckCircle2 size={18} />
+                  </span>
+                  <div>
+                    <small style={{ display: 'block', fontSize: '8.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b' }}>
+                      Correct
+                    </small>
+                    <b style={{ fontSize: '20px', fontWeight: '900', color: '#16a34a', lineHeight: 1.1, display: 'block', marginTop: '2px' }}>{correct}</b>
+                  </div>
+                </div>
+
+                {/* Incorrect */}
+                <div style={{
+                  borderRadius: '16px', backgroundColor: '#ffffff',
+                  padding: '14px 16px', border: '1px solid #f1f5f9',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: '12px'
+                }}>
+                  <span style={{
+                    width: '38px', height: '38px', borderRadius: '10px',
+                    backgroundColor: '#fff1f2', color: '#e11d48', display: 'grid', placeItems: 'center', flexShrink: 0
+                  }}>
+                    <XCircle size={18} />
+                  </span>
+                  <div>
+                    <small style={{ display: 'block', fontSize: '8.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b' }}>
+                      Incorrect
+                    </small>
+                    <b style={{ fontSize: '20px', fontWeight: '900', color: '#e11d48', lineHeight: 1.1, display: 'block', marginTop: '2px' }}>{wrong}</b>
+                  </div>
+                </div>
+
+                {/* Tests Completed */}
+                <div style={{
+                  borderRadius: '16px', backgroundColor: '#ffffff',
+                  padding: '14px 16px', border: '1px solid #f1f5f9',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: '12px'
+                }}>
+                  <span style={{
+                    width: '38px', height: '38px', borderRadius: '50%',
+                    backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', display: 'grid', placeItems: 'center', flexShrink: 0
+                  }}>
+                    <Trophy size={18} />
+                  </span>
+                  <div>
+                    <small style={{ display: 'block', fontSize: '8.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b' }}>
+                      Tests Completed
+                    </small>
+                    <b style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block', marginTop: '2px' }}>
+                      {reportData?.testsCompleted || reportData?.totalTestsCompleted || user?.testsCompleted || 1}
+                    </b>
+                  </div>
+                </div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -577,7 +654,10 @@ export const PracticeTest: React.FC = () => {
           </div>
 
           {/* Card 2: Question Review */}
-          <div onClick={() => setShowReview(r => !r)} className="pt-ss3-btn" style={{
+          <div onClick={() => {
+            const el = document.getElementById('tested-questions-section');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }} className="pt-ss3-btn" style={{
             background: '#ffffff', borderRadius: '18px', padding: '20px 24px',
             border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between'
@@ -588,9 +668,9 @@ export const PracticeTest: React.FC = () => {
               </div>
               <div>
                 <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>
-                  {showReview ? 'Hide Review' : 'Question Review'}
+                  Question Review
                 </h4>
-                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Go through your answers</p>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Review tested questions below</p>
               </div>
             </div>
             <ChevronRight size={20} color="#6366f1" />
@@ -598,119 +678,248 @@ export const PracticeTest: React.FC = () => {
 
           {/* Card 3: New Test → */}
           <div onClick={() => navigate('/panel/create')} className="pt-ss3-btn" style={{
-            background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-            borderRadius: '18px', padding: '20px 24px', color: '#ffffff',
-            boxShadow: '0 6px 20px rgba(124,58,237,0.25)',
+            background: '#ffffff', borderRadius: '18px', padding: '20px 24px',
+            border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Zap size={22} color="#f59e0b" fill="#f59e0b" />
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Zap size={22} color="#f97316" fill="#f97316" />
               </div>
               <div>
-                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  New Test <ArrowRight size={16} />
+                <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  New Test <ArrowRight size={15} />
                 </h4>
-                <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: '500' }}>Practice another test</p>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Practice another test</p>
               </div>
             </div>
-            <ChevronRight size={20} color="#ffffff" />
+            <ChevronRight size={20} color="#6366f1" />
           </div>
 
         </div>
 
-        {/* ── Bottom Section: Next Steps for You (Matching SS3) ── */}
-        <div style={{
-          background: '#f8fafc', borderRadius: '24px', padding: '28px 32px',
-          border: '1px solid #e2e8f0', marginBottom: '24px', position: 'relative'
+        {/* ── Tested Questions Review Section (Pixel Perfect to Mockup) ── */}
+        <div id="tested-questions-section" style={{
+          background: '#ffffff', borderRadius: '24px', padding: '32px',
+          border: '1px solid #f1f5f9', boxShadow: '0 4px 24px rgba(0,0,0,0.02)',
+          marginBottom: '32px'
         }}>
           {/* Header Bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '900', color: '#3730a3', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Lightbulb size={20} color="#4338ca" /> Next Steps for You
-            </h4>
-            <div style={{
-              fontFamily: "'Segoe Script', 'Caveat', 'Comic Sans MS', cursive",
-              fontSize: '15px', fontWeight: '700', color: '#4f46e5',
-              display: 'flex', alignItems: 'center', gap: '4px'
-            }}>
-              <span>Small Steps Big Progress!</span>
-              <svg width="24" height="20" viewBox="0 0 24 20" fill="none">
-                <path d="M 3 16 Q 14 14 18 5" stroke="#4f46e5" strokeWidth="2.2" strokeLinecap="round" />
-                <path d="M 12 5 L 18 5 L 18 11" stroke="#4f46e5" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={22} color="#6366f1" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.3px' }}>
+                  Tested Questions Review & Explanations
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+                  Full breakdown of tested questions with correct options and detailed explanations
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <span style={{
+                padding: '8px 18px', borderRadius: '20px', background: '#dcfce7',
+                color: '#15803d', fontSize: '13px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px'
+              }}>
+                <CheckCircle2 size={16} color="#15803d" /> {correct} Correct
+              </span>
+              <span style={{
+                padding: '8px 18px', borderRadius: '20px', background: '#ffe4e6',
+                color: '#e11d48', fontSize: '13px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px'
+              }}>
+                <XCircle size={16} color="#e11d48" /> {wrong} Incorrect
+              </span>
             </div>
           </div>
 
-          {/* 4 Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            {[
-              { title: 'Review Your Answers', desc: 'Understand mistakes and learn from explanations', icon: <BookOpen size={20} color="#2563eb" />, iconBg: '#eff6ff', action: () => { setShowReview(true); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); } },
-              { title: 'Focus on Weak Areas', desc: 'Practice domain-wise for better results', icon: <Crosshair size={20} color="#db2777" />, iconBg: '#fdf2f8', action: () => navigate('/panel/create') },
-              { title: 'Track Your Progress', desc: 'Take more tests to improve your readiness', icon: <TrendingUp size={20} color="#7c3aed" />, iconBg: '#f3f0ff', action: () => navigate('/panel/reports') },
-              { title: 'Create Custom Test', desc: 'Configure difficulty, timing & topic mix', icon: <Sliders size={20} color="#b45309" />, iconBg: '#fffbeb', action: () => navigate('/panel/create') },
-            ].map((ns, i) => (
-              <div key={i} onClick={ns.action} className="pt-ss3-next-step" style={{
-                background: '#ffffff', borderRadius: '18px', padding: '20px 18px',
-                border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                minHeight: '140px'
-              }}>
-                <div>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: ns.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
-                    {ns.icon}
+          {/* Questions Cards List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {(reportData?.testQuestions || testData?.testQuestions || []).map((q: any, idx: number) => {
+              const uAns = selectedAnswers[q._id] || (Array.isArray(q.userAnswer) ? q.userAnswer : q.userAnswer ? [q.userAnswer] : []);
+              const cAns = Array.isArray(q.correctAnswers)
+                ? q.correctAnswers
+                : Array.isArray(q.correctAnswer)
+                ? q.correctAnswer
+                : q.correctAnswers !== undefined
+                ? [q.correctAnswers]
+                : q.correctAnswer !== undefined
+                ? [q.correctAnswer]
+                : [];
+              const opts = getOptionsArray(q.options);
+              
+              const isCorr = q.score > 0 || (cAns.length > 0 && uAns.length === cAns.length && uAns.every((a: any) => cAns.includes(a)));
+              const badgeBg = isCorr ? '#dcfce7' : '#ffe4e6';
+              const badgeTextColor = isCorr ? '#16a34a' : '#e11d48';
+
+              let justification = '';
+              if (Array.isArray(q.justifications) && q.justifications.length > 0) {
+                justification = q.justifications.filter(Boolean).join(' ');
+              } else if (typeof q.justifications === 'string' && q.justifications.trim()) {
+                justification = q.justifications;
+              } else if (typeof q.explanation === 'string' && q.explanation.trim()) {
+                justification = q.explanation;
+              } else if (typeof q.justification === 'string' && q.justification.trim()) {
+                justification = q.justification;
+              } else if (typeof q.description === 'string' && q.description.trim()) {
+                justification = q.description;
+              }
+
+              const correctOptObj = opts.find((opt, optIdx) => {
+                return cAns.some((c: any) => {
+                  if (c === undefined || c === null) return false;
+                  const cStr = String(c).trim().toLowerCase();
+                  const optTextStr = String(opt.text).trim().toLowerCase();
+                  const optKeyStr = String(opt.key).trim().toLowerCase();
+                  const labelStr = String(LABELS[optIdx] || '').trim().toLowerCase();
+                  return (
+                    cStr === optTextStr ||
+                    cStr === optKeyStr ||
+                    cStr === labelStr ||
+                    cStr === String(optIdx + 1) ||
+                    cStr.includes(optTextStr) ||
+                    optTextStr.includes(cStr)
+                  );
+                });
+              });
+
+              if (!justification || justification.includes('cybersecurity certification standards')) {
+                const correctLabel = correctOptObj ? correctOptObj.text : cAns.join(', ') || 'the marked correct option';
+                justification = `The correct answer is "${correctLabel}". This selection directly maximizes outcome effectiveness and aligns with standard governance and audit practices.`;
+              }
+
+              return (
+                <div key={q._id || idx} style={{
+                  padding: '28px', borderRadius: '24px', background: '#ffffff',
+                  border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+                  position: 'relative'
+                }}>
+                  {/* Card Header Badges & Bookmark */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{
+                        padding: '4px 14px', borderRadius: '20px', background: '#ede9fe',
+                        color: '#6366f1', fontSize: '13px', fontWeight: '800'
+                      }}>
+                        Q{idx + 1}
+                      </span>
+                      <span style={{
+                        padding: '4px 14px', borderRadius: '20px', background: badgeBg,
+                        color: badgeTextColor, fontSize: '13px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px'
+                      }}>
+                        {isCorr ? <CheckCircle2 size={14} color="#16a34a" /> : <XCircle size={14} color="#e11d48" />}
+                        {isCorr ? 'Correct' : 'Incorrect'}
+                      </span>
+                    </div>
+                    <Bookmark size={20} color="#cbd5e1" style={{ cursor: 'pointer' }} />
                   </div>
-                  <h5 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{ns.title}</h5>
-                  <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b', lineHeight: 1.45, fontWeight: '500' }}>{ns.desc}</p>
+
+                  {/* Question Title */}
+                  <h4 style={{ margin: '0 0 20px', fontSize: '15.5px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.2px', lineHeight: 1.5 }}>
+                    {q.question}
+                  </h4>
+
+                  {/* Options List */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '20px' }}>
+                    {opts.map((opt, optIdx) => {
+                      const isUserSelected = uAns.some((u: any) => {
+                        if (u === undefined || u === null) return false;
+                        const uStr = String(u).trim().toLowerCase();
+                        const optTextStr = String(opt.text).trim().toLowerCase();
+                        const optKeyStr = String(opt.key).trim().toLowerCase();
+                        const labelStr = String(LABELS[optIdx] || '').trim().toLowerCase();
+                        return uStr === optTextStr || uStr === optKeyStr || uStr === labelStr || uStr === String(optIdx + 1);
+                      });
+
+                      const isCorrectOpt = cAns.some((c: any) => {
+                        if (c === undefined || c === null) return false;
+                        const cStr = String(c).trim().toLowerCase();
+                        const optTextStr = String(opt.text).trim().toLowerCase();
+                        const optKeyStr = String(opt.key).trim().toLowerCase();
+                        const labelStr = String(LABELS[optIdx] || '').trim().toLowerCase();
+                        return (
+                          cStr === optTextStr ||
+                          cStr === optKeyStr ||
+                          cStr === labelStr ||
+                          cStr === String(optIdx + 1) ||
+                          cStr.includes(optTextStr) ||
+                          (optTextStr.length > 3 && cStr.includes(optTextStr))
+                        );
+                      });
+
+                      let optBg = '#ffffff';
+                      let optBorder = '1px solid #e2e8f0';
+                      let optTextColor = '#334155';
+                      let letterBg = '#f1f5f9';
+                      let letterColor = '#475569';
+                      let optFontWeight = '500';
+                      let rightIcon = null;
+
+                      if (isCorrectOpt) {
+                        optBg = '#e6f4ea';
+                        optBorder = '1.5px solid #22c55e';
+                        optTextColor = '#15803d';
+                        letterBg = '#16a34a';
+                        letterColor = '#ffffff';
+                        optFontWeight = '700';
+                        rightIcon = <Check size={20} color="#16a34a" strokeWidth={3} />;
+                      } else if (isUserSelected && !isCorrectOpt) {
+                        optBg = '#fde8e8';
+                        optBorder = '1.5px solid #f87171';
+                        optTextColor = '#b91c1c';
+                        letterBg = '#e11d48';
+                        letterColor = '#ffffff';
+                        optFontWeight = '700';
+                        rightIcon = <XCircle size={20} color="#e11d48" />;
+                      }
+
+                      return (
+                        <div key={opt.key} style={{
+                          padding: '14px 20px', borderRadius: '16px', background: optBg,
+                          border: optBorder, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          transition: 'all 0.2s ease'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <span style={{
+                              width: '32px', height: '32px', borderRadius: '50%',
+                              background: letterBg, color: letterColor,
+                              display: 'grid', placeItems: 'center', fontSize: '13px', fontWeight: '800', flexShrink: 0
+                            }}>
+                              {LABELS[optIdx] || opt.key}
+                            </span>
+                            <span style={{ fontSize: '14.5px', fontWeight: optFontWeight, color: optTextColor }}>
+                              {opt.text}
+                            </span>
+                          </div>
+                          {rightIcon}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Explanation Box (Matching Mockup) */}
+                  <div style={{
+                    padding: '20px 24px', borderRadius: '16px',
+                    background: '#f3f0ff', border: '1px solid #e0e7ff',
+                    borderLeft: '4px solid #6366f1'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <Lightbulb size={18} color="#6366f1" />
+                      <strong style={{ fontSize: '14px', color: '#6366f1', fontWeight: '800' }}>
+                        Explanation
+                      </strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '13.5px', color: '#334155', lineHeight: 1.6, fontWeight: '500' }}>
+                      {justification}
+                    </p>
+                  </div>
                 </div>
-                <div style={{ alignSelf: 'flex-end', marginTop: '14px' }}>
-                  <ChevronRight size={18} color="#6366f1" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
-
-        {/* ── Question Review Dropdown ── */}
-        {showReview && (
-          <div className="pt-ss3-card" style={{ background: '#ffffff', borderRadius: '20px', padding: '28px', border: '1px solid #e2e8f0', boxShadow: '0 4px 24px rgba(0,0,0,0.04)' }}>
-            <h4 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: '900', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              📝 Question Review
-              <span style={{ background: '#ede9fe', color: '#4338ca', fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '20px' }}>
-                {testData?.testQuestions?.length} questions
-              </span>
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {testData?.testQuestions?.map((q: any, idx: number) => {
-                const uAns = selectedAnswers[q._id] || (Array.isArray(q.userAnswer) ? q.userAnswer : q.userAnswer ? [q.userAnswer] : []);
-                const opts = getOptionsArray(q.options);
-                return (
-                  <div key={q._id} style={{ padding: '18px', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
-                    <p style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: '600', color: '#0f172a', lineHeight: 1.6 }}>
-                      <span style={{ color: '#4f46e5', marginRight: '6px', fontWeight: '800' }}>Q{idx + 1}.</span>
-                      {q.question}
-                    </p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {opts.map(opt => {
-                        const sel = uAns.includes(opt.text);
-                        return (
-                          <span key={opt.key} style={{
-                            padding: '6px 14px', borderRadius: '8px', fontSize: '12px',
-                            background: sel ? '#e0e7ff' : '#ffffff',
-                            border: `1px solid ${sel ? '#a5b4fc' : '#cbd5e1'}`,
-                            color: sel ? '#3730a3' : '#64748b',
-                            fontWeight: sel ? '700' : '400',
-                          }}>
-                            {sel && '✓ '}{opt.text}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -741,7 +950,7 @@ export const PracticeTest: React.FC = () => {
         @keyframes ptSlide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
         @keyframes ptPulseRed{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
         .pt-option-btn { transition: all .15s ease !important; }
-        .pt-option-btn:hover { transform: translateX(4px) !important; border-color: #7c3aed !important; background: #faf8ff !important; }
+        .pt-option-btn:hover { transform: translateX(4px) !important; }
         .pt-nav-btn    { transition: all .15s ease !important; }
         .pt-nav-btn:hover { transform: translateY(-2px) !important; }
         .pt-q-dot      { transition: all .15s ease; cursor: pointer; }
@@ -816,6 +1025,18 @@ export const PracticeTest: React.FC = () => {
             boxShadow: '0 4px 24px rgba(0,0,0,0.07)', marginBottom: '16px',
             border: '1px solid #f0f2f8', animation: 'ptSlide .2s ease',
           }}>
+            {partialNotice && (
+              <div style={{
+                background: '#fffbeb', border: '1.5px solid #f59e0b', borderRadius: '12px',
+                padding: '10px 16px', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '10px',
+                color: '#b45309', fontSize: '13px', fontWeight: '700',
+                boxShadow: '0 4px 14px rgba(245,158,11,0.15)', animation: 'ptFadeUp .2s ease'
+              }}>
+                <AlertCircle size={18} color="#d97706" />
+                <span>{partialNotice}</span>
+              </div>
+            )}
+
             {/* Badges */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>
               {cqStatus === 'Partial Answer' && (
@@ -850,28 +1071,52 @@ export const PracticeTest: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {opts.map((opt, i) => {
                 const sel = userAns.includes(opt.text);
+                const isPartial = cqStatus === 'Partial Answer';
+
+                const borderColor = sel
+                  ? (isPartial ? '#f59e0b' : '#7c3aed')
+                  : '#e8edf3';
+
+                const optionBg = sel
+                  ? (isPartial ? 'linear-gradient(135deg,#fffdf0,#fffbeb)' : 'linear-gradient(135deg,#faf8ff,#f3f0ff)')
+                  : '#fafbfc';
+
+                const badgeBg = sel
+                  ? (isPartial ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#7c3aed,#a78bfa)')
+                  : '#f1f5f9';
+
+                const badgeTextColor = sel ? '#fff' : '#94a3b8';
+
+                const optionTextColor = sel
+                  ? (isPartial ? '#92400e' : '#4c1d95')
+                  : '#374151';
+
+                const boxShadow = sel
+                  ? (isPartial ? '0 2px 12px rgba(245,158,11,0.2)' : '0 2px 12px rgba(124,58,237,0.12)')
+                  : 'none';
+
                 return (
                   <button key={opt.key} type="button" onClick={() => handleOptionSelect(cq._id, opt.text, isMulti)}
                     className="pt-option-btn"
                     style={{
                       display: 'flex', alignItems: 'flex-start', gap: '14px',
                       padding: '15px 18px',
-                      border: `2px solid ${sel ? '#7c3aed' : '#e8edf3'}`,
+                      border: `2px solid ${borderColor}`,
                       borderRadius: '14px',
-                      background: sel ? 'linear-gradient(135deg,#faf8ff,#f3f0ff)' : '#fafbfc',
+                      background: optionBg,
                       cursor: 'pointer', textAlign: 'left', outline: 'none', width: '100%',
-                      boxShadow: sel ? '0 2px 12px rgba(124,58,237,0.12)' : 'none',
+                      boxShadow: boxShadow,
                     }}>
                     <span style={{
                       width: '30px', height: '30px', borderRadius: sel ? '10px' : '50%', flexShrink: 0,
-                      background: sel ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : '#f1f5f9',
-                      color: sel ? '#fff' : '#94a3b8',
+                      background: badgeBg,
+                      color: badgeTextColor,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', fontWeight: '800', transition: 'all .15s ease',
                     }}>
                       {sel ? <CheckCircle2 size={16} /> : LABELS[i] || i + 1}
                     </span>
-                    <span style={{ fontSize: '14px', color: sel ? '#4c1d95' : '#374151', lineHeight: '1.65', fontWeight: sel ? '600' : '400', flex: 1 }}>
+                    <span style={{ fontSize: '14px', color: optionTextColor, lineHeight: '1.65', fontWeight: sel ? '600' : '400', flex: 1 }}>
                       {opt.text}
                     </span>
                   </button>
@@ -942,15 +1187,18 @@ export const PracticeTest: React.FC = () => {
                 const status = answerStatuses[q._id] || 'Unanswered';
                 const isCur  = currentIdx === idx;
 
-                let bg = '#f1f5f9';
-                let color = '#94a3b8';
-                let border = 'none';
+                let bg = '#fef2f2';
+                let color = '#ef4444';
+                let border = '1px solid #fecaca';
 
                 if (isCur) {
                   bg = 'linear-gradient(135deg,#7c3aed,#a78bfa)';
                   color = '#fff';
+                  border = 'none';
                   if (status === 'Partial Answer') {
                     border = '2px solid #f59e0b';
+                  } else if (status === 'Unanswered') {
+                    border = '2px solid #ef4444';
                   }
                 } else if (status === 'Partial Answer') {
                   bg = '#fffbeb';
@@ -959,6 +1207,7 @@ export const PracticeTest: React.FC = () => {
                 } else if (status === 'Answered') {
                   bg = '#ede9fe';
                   color = '#7c3aed';
+                  border = '1px solid #ddd6fe';
                 }
 
                 return (
@@ -978,9 +1227,9 @@ export const PracticeTest: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
               {[
                 { color: 'linear-gradient(135deg,#7c3aed,#a78bfa)', label: 'Current Question' },
-                { color: '#ede9fe', label: 'Answered' },
+                { color: '#ede9fe', label: 'Answered', border: '1px solid #ddd6fe' },
                 { color: '#fffbeb', label: 'Partial Answer', border: '1px solid #fde68a' },
-                { color: '#f1f5f9', label: 'Unanswered' },
+                { color: '#fef2f2', label: 'Unanswered', border: '1px solid #fecaca' },
               ].map((leg, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '12px', height: '12px', borderRadius: '4px', background: leg.color, border: leg.border || 'none', flexShrink: 0 }} />
