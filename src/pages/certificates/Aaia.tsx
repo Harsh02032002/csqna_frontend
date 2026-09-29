@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bot, CheckCircle2, Cpu, FileQuestion, Globe, Minus, Plus, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, Bot, CheckCircle2, Cpu, FileQuestion, Minus, Plus, Sparkles, Target } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { useCMS } from '../../utils/useCMS';
 

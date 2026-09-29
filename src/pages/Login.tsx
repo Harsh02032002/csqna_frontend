@@ -12,7 +12,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [verifyHuman, setVerifyHuman] = useState(false);
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ type: ToastType; title?: string; message: string } | null>(null);
 

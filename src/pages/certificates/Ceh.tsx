@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   CheckCircle2,
-  ChevronDown,
   FileQuestion,
   Minus,
   Plus,
@@ -12,10 +11,8 @@ import {
   Terminal,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { useCMS } from '../../utils/useCMS';
 
 export const Ceh: React.FC = () => {
-  const { t } = useCMS();
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
 
   const faqs = [

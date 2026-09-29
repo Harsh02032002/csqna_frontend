@@ -18,8 +18,8 @@ export const Register: React.FC = () => {
   const [agreeTnc, setAgreeTnc] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [, setError] = useState('');
+  const [, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Toast state

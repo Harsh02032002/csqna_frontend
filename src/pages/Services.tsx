@@ -13,7 +13,6 @@ import {
   LayoutGrid,
   Settings,
   ShieldCheck,
-  Sparkles,
   Target,
   TrendingUp,
   UserCheck,

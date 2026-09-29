@@ -4,6 +4,8 @@ export interface UserDetails {
   email: string;
   username: string;
   role: 'admin' | 'user';
+  first_name?: string;
+  last_name?: string;
   createdAt?: string;
   planDetails?: {
     planName?: string;
