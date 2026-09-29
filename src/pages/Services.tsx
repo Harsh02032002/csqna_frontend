@@ -18,7 +18,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import learnerImage from '../../../pixel-perfect-path-47/src/assets/csqna-learner.png';
+import learnerImage from '../assets/csqna-learner.png';
 
 export const Services: React.FC = () => {
   const skillGapCards = [
