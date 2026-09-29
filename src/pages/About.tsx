@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-const learnerImage = "/assets/images/new/cyber-security.png";
+const learnerImage = "/marketing-assets/images/csqna-learner.png";
 
 export const About: React.FC = () => {
   const offerItems = [

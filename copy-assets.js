@@ -66,3 +66,17 @@ try {
 } catch (e) {
   console.error('[Logo Sync Error]', e);
 }
+
+// Copy csqna-learner.png to public marketing assets
+try {
+  const learnerSrc = 'e:/osa-data/pixel-perfect-path-47/src/assets/csqna-learner.png';
+  const learnerDst = path.resolve('public/marketing-assets/images/csqna-learner.png');
+  if (fs.existsSync(learnerSrc)) {
+    const dir = path.dirname(learnerDst);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.copyFileSync(learnerSrc, learnerDst);
+    console.log('[Learner Image] Successfully copied csqna-learner.png to public/marketing-assets/images/');
+  }
+} catch (e) {
+  console.error('[Learner Image Copy Error]', e);
+}
