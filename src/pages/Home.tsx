@@ -32,7 +32,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import learnerImage from '../assets/csqna-learner.png';
+const learnerImage = "/assets/images/new/cyber-security.png";
 
 const certifications = [
   { code: "CISA", title: "Certified Information\nSystems Auditor", questions: "1,200+ Questions", domains: "5 Domains", mark: "ring-red", path: "/cisa" },
