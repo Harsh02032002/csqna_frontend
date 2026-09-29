@@ -1,73 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom adjustments if any */
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: #fff;
-  color: #333;
+:root {
+  --radius: 0.8rem;
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 262 83% 58%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 262 83% 58%;
+  --brand-blue: #2563EB;
+  --brand-purple: #8B5CF6;
+  --brand-pink: #EC4899;
+  --brand-orange: #F97316;
+  --brand-red: #EF4444;
+  --success: #10B981;
+  --teal: #14B8A6;
+  --soft-blue: #EFF6FF;
+  --hero: #F8FAFC;
 }
 
-/* ================= Swiper Custom Styling ================= */
-.swiper-button-next,
-.swiper-button-prev {
-  color: #fff !important;
-  background: rgba(0, 0, 0, 0.4) !important;
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
-  transition: 0.3s;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+@layer base {
+  * {
+    border-color: #E2E8F0;
+  }
+  body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    min-width: 320px;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
-.swiper-button-next:hover,
-.swiper-button-prev:hover {
-  background: rgba(0, 0, 0, 0.7) !important;
+/* Custom design utilities from pixel-perfect-path-47 */
+.font-hand {
+  font-family: 'Caveat', cursive, sans-serif !important;
 }
 
-.swiper-button-next::after,
-.swiper-button-prev::after {
-  font-size: 16px !important;
-  font-weight: bold;
+.bg-cta {
+  background-image: linear-gradient(100deg, #8B5CF6 0%, #EC4899 60%, #F97316 100%);
 }
 
-/* ================= Video Wrapper Sizing (16:9) ================= */
-.video-wrapper {
-  position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  background: #000;
+.hero-surface {
+  background:
+    radial-gradient(circle at 70% 12%, rgba(37, 99, 235, 0.08), transparent 30%),
+    linear-gradient(112deg, #FFFFFF 0%, #F8FAFC 54%, rgba(139, 92, 246, 0.1) 100%);
 }
 
-.video-wrapper video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.logo-gradient {
+  background-image: linear-gradient(90deg, #2563EB, #8B5CF6 42%, #EC4899 74%, #F97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-/* ================= FAQ Accordion Custom Styles ================= */
-section.faq-area, #accordion {
-  scroll-margin-top: 120px; /* Prevent anchor links from cutting off under the sticky header */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .float-soft { animation: float-soft 5s ease-in-out infinite; }
+}
+
+/* FAQ Accordion Styles */
 #accordion .faq-card {
-  background: #fff;
-  border: 1px solid #eaeaea;
-  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
   margin-bottom: 12px;
-  padding: 12px 20px;
-  transition: all 0.3s ease;
+  padding: 16px 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+#accordion .faq-card:hover {
+  border-color: #CBD5E1;
 }
 
 #accordion .faq-header {
@@ -79,20 +115,19 @@ section.faq-area, #accordion {
 
 #accordion .faq-header h5 {
   margin: 0;
-  font-family: 'Poppins', sans-serif !important;
-  font-size: 16px !important;
-  font-weight: 500 !important; /* Lighter font weight like production */
-  color: #854c93 !important; /* Brand purple */
-  text-transform: none !important; /* Disable auto-capitalization */
-  line-height: 1.5;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0F172A !important;
+  line-height: 1.4;
 }
 
 #accordion .faq-icon {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background-color: #854c93;
-  color: #fff;
+  background-color: #8B5CF6;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,127 +141,49 @@ section.faq-area, #accordion {
 #accordion .faq-body {
   padding-top: 12px;
   margin-top: 12px;
-  border-top: 1px solid #f1f1f1;
-  color: #555;
-  font-size: 15px;
-  line-height: 1.7;
-  text-align: justify;
+  border-top: 1px solid #F1F5F9;
+  color: #64748B;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
-/* ================= Certificate Pages - Card Fixes ================= */
-/* heading color override is in app.css end */
-
-.cert-page .blue-block {
-  background-color: #fff !important;
-  color: #333 !important;
-}
-
-.cert-page .blue-block:hover {
-  background-color: #f3eaf5 !important;
-  color: #333 !important;
-}
-
-.cert-page .blue-block h3 {
-  color: #854c93 !important;
-}
-
-.cert-page .blue-block:hover h3 {
-  color: #854c93 !important;
-}
-
-.cert-page .blue-block p {
-  color: #444 !important;
-}
-
-.cert-page .blue-block .f-size-14 {
-  color: #444 !important;
-}
-
-/* ===== GLOBAL LAYOUT ADJUSTMENTS FOR FIXED NAVBAR ===== */
-.rt-site-header {
-  height: 60px !important;
-}
-
-.rt-site-header .main-header {
-  padding: 0 !important;
-  height: 60px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.rt-site-header .navbar {
-  padding: 0 !important;
-  width: 100% !important;
-}
-
-.rt-site-header .brand-logo img {
-  max-height: 40px !important;
-  width: auto !important;
-}
-
-.rt-site-header .sticky-logo img {
-  max-height: 40px !important;
-  width: auto !important;
-}
-
-/* Push all public pages below the fixed header */
-main.flex-grow {
-  padding-top: 80px !important;
-}
-
-/* Clean up cert-page specific padding */
-.cert-page {
-  padding-top: 0 !important;
-}
-
-.cert-page .rt-breadcump h1 {
-    color: #ffffff !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-.cert-page .rt-breadcump .text-white {
-    color: #ffffff !important;
-}
-
-/* ===== DISCLAIMER BANNER STYLES ===== */
+/* Disclaimer Banner */
 .disclaimer-banner {
-    background-color: #fffbeb !important;
-    border-left: 4px solid #f59e0b !important;
-    padding: 10px 14px !important;
-    border-radius: 0 8px 8px 0 !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
-    margin-bottom: 20px !important;
-    display: inline-block !important;
-    max-width: 100% !important;
-    text-align: left !important;
+  background-color: #FFFBEB !important;
+  border-left: 4px solid #F59E0B !important;
+  padding: 10px 14px !important;
+  border-radius: 0 8px 8px 0 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
+  margin-bottom: 20px !important;
+  display: inline-block !important;
+  max-width: 100% !important;
+  text-align: left !important;
 }
 .disclaimer-banner .disclaimer-title {
-    color: #b45309 !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-    margin-right: 8px !important;
+  color: #B45309 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  margin-right: 8px !important;
 }
 .disclaimer-banner .disclaimer-text {
-    color: #78350f !important;
-    font-size: 13px !important;
-    line-height: 1.4 !important;
+  color: #78350F !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
 }
 
-/* ===== INTERACTIVE CREDENTIAL CARD ===== */
+/* Credential Card */
 .credential-card {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #2d153b 0%, #190a22 100%) !important;
-    color: #ffffff !important;
-    border-radius: 16px !important;
-    padding: 24px !important;
-    box-shadow: 0 10px 25px -5px rgba(133, 76, 147, 0.3), 0 8px 10px -6px rgba(133, 76, 147, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease !important;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%) !important;
+  color: #ffffff !important;
+  border-radius: 20px !important;
+  padding: 28px !important;
+  box-shadow: 0 10px 30px -5px rgba(139, 92, 246, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease !important;
 }
-
 .credential-card:hover {
-    transform: translateY(-6px) !important;
-    box-shadow: 0 20px 30px -10px rgba(133, 76, 147, 0.4), 0 10px 15px -5px rgba(133, 76, 147, 0.4) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-6px) !important;
+  box-shadow: 0 20px 35px -10px rgba(139, 92, 246, 0.35) !important;
 }
-

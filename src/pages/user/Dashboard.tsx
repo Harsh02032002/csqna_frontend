@@ -21,7 +21,7 @@ import {
   Zap
 } from 'lucide-react';
 
-const TRENDING = [
+const DEFAULT_TRENDING = [
   { name: 'Data Protection & Privacy', rank: 1, pct: 94, icon: Shield, color: '#7c3aed', bg: '#f3e8ff' },
   { name: 'Information Security Risk', rank: 2, pct: 87, icon: AlertTriangle, color: '#e11d48', bg: '#ffe4e6' },
   { name: 'Network Security', rank: 3, pct: 81, icon: Network, color: '#16a34a', bg: '#dcfce7' },
@@ -54,105 +54,256 @@ const ActionCard: React.FC<{ icon: string; title: string; desc: string; gradient
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ active: 0, ongoing: 1, completed: 13, total: 18, avgScore: 78 });
+
+  const [stats, setStats] = useState({
+    active: 0,
+    ongoing: 0,
+    completed: 0,
+    total: 0,
+    avgScore: 0,
+    completionRate: 0,
+  });
+
   const [recentTests, setRecentTests] = useState<any[]>([]);
+  const [trendingTopics, setTrendingTopics] = useState<any[]>(DEFAULT_TRENDING);
+  const [filterPeriod, setFilterPeriod] = useState<'7D' | '30D' | 'All'>('7D');
+  const [reportsData, setReportsData] = useState<any[]>([]);
+
   const chartRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstance = useRef<any>(null);
 
+  // Load Dashboard Stats, Reports & Ongoing Tests
   useEffect(() => {
-    const fetchDashboard = async () => {
+    let isMounted = true;
+
+    const fetchAllDashboardData = async () => {
       try {
-        const res = await api.get('/user/dashboard');
-        if (res.data?.status && res.data?.data) {
-          const { testStats, recentActivity } = res.data.data;
-          setStats((prev) => ({
-            ...prev,
-            active: testStats.active || 0,
-            ongoing: testStats.ongoing || 1,
-            completed: testStats.completed || 13,
-            total: testStats.total || 18,
-          }));
-          if (recentActivity && recentActivity.length > 0) {
-            setRecentTests(recentActivity);
+        // 1. Fetch Dashboard Stats
+        const dashRes = await api.get('/user/dashboard').catch(() => null);
+        let activeCount = 0;
+        let ongoingCount = 0;
+        let completedCount = 0;
+        let totalCount = 0;
+
+        if (dashRes?.data?.status && dashRes?.data?.data?.testStats) {
+          const s = dashRes.data.data.testStats;
+          activeCount = s.active || 0;
+          ongoingCount = s.ongoing || 0;
+          completedCount = s.completed || 0;
+          totalCount = s.total || 0;
+        }
+
+        // 2. Fetch User Reports
+        const reportsRes = await api.get('/user/practice/reports').catch(() => null);
+        let reportsList: any[] = [];
+        if (reportsRes?.data?.data && Array.isArray(reportsRes.data.data)) {
+          reportsList = reportsRes.data.data;
+        } else if (reportsRes?.data && Array.isArray(reportsRes.data)) {
+          reportsList = reportsRes.data;
+        }
+
+        // 3. Fetch Ongoing Tests
+        const ongoingRes = await api.get('/user/practice/listongoing').catch(() => null);
+        if (ongoingRes?.data?.data && Array.isArray(ongoingRes.data.data)) {
+          ongoingCount = ongoingRes.data.data.length;
+        }
+
+        if (!isMounted) return;
+
+        setReportsData(reportsList);
+
+        // Compute dynamic metrics
+        const totalCompleted = reportsList.length > 0 ? reportsList.length : completedCount;
+        const totalAll = totalCount > 0 ? totalCount : totalCompleted + ongoingCount;
+        
+        let calculatedAvgScore = 0;
+        if (reportsList.length > 0) {
+          const totalScoreSum = reportsList.reduce((acc, curr) => {
+            const sc = typeof curr.score === 'number' ? curr.score : parseFloat(curr.score) || 0;
+            return acc + sc;
+          }, 0);
+          calculatedAvgScore = Math.round(totalScoreSum / reportsList.length);
+        }
+
+        const compRate = totalAll > 0 ? Math.round((totalCompleted / totalAll) * 100) : 0;
+
+        setStats({
+          active: activeCount,
+          ongoing: ongoingCount,
+          completed: totalCompleted,
+          total: totalAll,
+          avgScore: calculatedAvgScore,
+          completionRate: compRate,
+        });
+
+        // Set recent 5 submitted tests
+        if (reportsList.length > 0) {
+          setRecentTests(reportsList.slice(0, 5));
+
+          // Calculate Dynamic Trending Topics based on user practice categories
+          const categoryScores: Record<string, { totalScore: number; count: number }> = {};
+          reportsList.forEach((r) => {
+            let catName = 'General Cybersecurity';
+            if (Array.isArray(r.category) && r.category.length > 0) {
+              catName = r.category[0];
+            } else if (typeof r.category === 'string' && r.category) {
+              catName = r.category;
+            } else if (r.testname) {
+              catName = r.testname;
+            }
+
+            const sc = typeof r.score === 'number' ? r.score : parseFloat(r.score) || 0;
+            if (!categoryScores[catName]) {
+              categoryScores[catName] = { totalScore: 0, count: 0 };
+            }
+            categoryScores[catName].totalScore += sc;
+            categoryScores[catName].count += 1;
+          });
+
+          const dynamicTrending = Object.entries(categoryScores)
+            .map(([name, val], i) => {
+              const avgPct = Math.round(val.totalScore / val.count);
+              const fallback = DEFAULT_TRENDING[i % DEFAULT_TRENDING.length];
+              return {
+                name,
+                rank: i + 1,
+                pct: avgPct,
+                icon: fallback.icon,
+                color: fallback.color,
+                bg: fallback.bg,
+              };
+            })
+            .sort((a, b) => b.pct - a.pct)
+            .map((item, index) => ({ ...item, rank: index + 1 }))
+            .slice(0, 6);
+
+          if (dynamicTrending.length > 0) {
+            setTrendingTopics(dynamicTrending);
           }
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching dynamic dashboard data:', err);
       }
     };
-    fetchDashboard();
+
+    fetchAllDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
+  // Update Dynamic Performance Overview Chart
   useEffect(() => {
     const win = window as any;
-    if (chartRef.current && win.Chart) {
-      try {
-        chartInstance.current?.destroy();
-        chartInstance.current = new win.Chart(chartRef.current, {
-          type: 'line',
-          data: {
-            labels: ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5', 'Test 6', 'Test 7'],
-            datasets: [
-              {
-                label: 'Score %',
-                data: [50, 70, 65, 92, 70, 55, 74],
-                borderColor: '#7c3aed',
-                backgroundColor: 'rgba(124, 58, 237, 0.08)',
-                fill: true,
-                pointBackgroundColor: '#7c3aed',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-                borderWidth: 2.5,
-                lineTension: 0.4,
-              },
-              {
-                label: 'Questions Attempted',
-                data: [15, 20, 18, 25, 22, 16, 20],
-                borderColor: '#a78bfa',
-                backgroundColor: 'rgba(167, 139, 250, 0.05)',
-                fill: true,
-                pointBackgroundColor: '#6366f1',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                borderWidth: 2,
-                lineTension: 0.4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            legend: { display: false },
-            tooltips: {
-              backgroundColor: '#1e293b',
-              titleFontColor: '#f1f5f9',
-              bodyFontColor: '#cbd5e1',
-              borderColor: '#334155',
-              borderWidth: 1,
-              cornerRadius: 12,
-            },
-            scales: {
-              xAxes: [
-                {
-                  gridLines: { display: false },
-                  ticks: { fontColor: '#94a3b8', fontSize: 11 }
-                }
-              ],
-              yAxes: [
-                {
-                  gridLines: { color: '#f1f5f9' },
-                  ticks: { beginAtZero: true, max: 100, fontColor: '#94a3b8', fontSize: 11 }
-                }
-              ]
-            }
-          },
-        });
-      } catch (e) {
-        console.warn('Chart render warning:', e);
+    if (!chartRef.current || !win.Chart) return;
+
+    try {
+      chartInstance.current?.destroy();
+
+      // Filter reports by period (7D / 30D / All)
+      let filtered = [...reportsData];
+      const now = Date.now();
+
+      if (filterPeriod === '7D') {
+        const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+        filtered = reportsData.filter((r) => new Date(r.createdAt || r.submitTime || now).getTime() >= sevenDaysAgo);
+      } else if (filterPeriod === '30D') {
+        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+        filtered = reportsData.filter((r) => new Date(r.createdAt || r.submitTime || now).getTime() >= thirtyDaysAgo);
       }
+
+      // Reverse so chronological (oldest to newest)
+      filtered = filtered.slice(0, 7).reverse();
+
+      let labels: string[] = [];
+      let scoreData: number[] = [];
+      let qData: number[] = [];
+
+      if (filtered.length > 0) {
+        filtered.forEach((item, i) => {
+          const dateObj = new Date(item.createdAt || item.submitTime || now);
+          const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          labels.push(formattedDate || `Session ${i + 1}`);
+
+          const sc = typeof item.score === 'number' ? item.score : parseFloat(item.score) || 0;
+          scoreData.push(Math.round(sc));
+
+          const qCount = item.questions?.length || item.totalQuestions || 20;
+          qData.push(qCount);
+        });
+      } else {
+        // Fallback smooth baseline data if user has no test history yet
+        labels = ['Session 1', 'Session 2', 'Session 3', 'Session 4', 'Session 5', 'Session 6', 'Session 7'];
+        scoreData = [0, 0, 0, 0, 0, 0, 0];
+        qData = [0, 0, 0, 0, 0, 0, 0];
+      }
+
+      chartInstance.current = new win.Chart(chartRef.current, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Score %',
+              data: scoreData,
+              borderColor: '#7c3aed',
+              backgroundColor: 'rgba(124, 58, 237, 0.08)',
+              fill: true,
+              pointBackgroundColor: '#7c3aed',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              borderWidth: 2.5,
+              lineTension: 0.4,
+            },
+            {
+              label: 'Questions Attempted',
+              data: qData,
+              borderColor: '#a78bfa',
+              backgroundColor: 'rgba(167, 139, 250, 0.05)',
+              fill: true,
+              pointBackgroundColor: '#6366f1',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              borderWidth: 2,
+              lineTension: 0.4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: { display: false },
+          tooltips: {
+            backgroundColor: '#1e293b',
+            titleFontColor: '#f1f5f9',
+            bodyFontColor: '#cbd5e1',
+            borderColor: '#334155',
+            borderWidth: 1,
+            cornerRadius: 12,
+          },
+          scales: {
+            xAxes: [
+              {
+                gridLines: { display: false },
+                ticks: { fontColor: '#94a3b8', fontSize: 11 }
+              }
+            ],
+            yAxes: [
+              {
+                gridLines: { color: '#f1f5f9' },
+                ticks: { beginAtZero: true, max: 100, fontColor: '#94a3b8', fontSize: 11 }
+              }
+            ]
+          }
+        },
+      });
+    } catch (e) {
+      console.warn('Chart render exception:', e);
     }
+
     return () => {
       try {
         chartInstance.current?.destroy();
@@ -160,11 +311,12 @@ export const Dashboard: React.FC = () => {
         // ignore
       }
     };
-  }, []);
+  }, [reportsData, filterPeriod]);
 
+  // Greeting and user details
   const hour = new Date().getHours();
   const greetingTime = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
-  const rawUser = user?.name || user?.email || '';
+  const rawUser = user?.first_name || user?.name || user?.username || user?.email || '';
   const cleanUser = rawUser.includes('@') ? rawUser.split('@')[0] : rawUser;
   const formattedName = cleanUser
     ? cleanUser.toLowerCase().split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
@@ -175,7 +327,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', fontFamily: "'Inter', system-ui, sans-serif", color: '#0f172a' }}>
       
-      {/* ── 1. HERO BANNER (Top Section - Matching Exact Mockup) ── */}
+      {/* ── 1. HERO BANNER (Top Section - Dynamic User Welcome) ── */}
       <div style={{
         background: 'linear-gradient(135deg, #f0f4ff 0%, #e8eefc 45%, #f5eefd 100%)',
         borderRadius: '26px', padding: '26px 30px', marginBottom: '24px',
@@ -232,7 +384,7 @@ export const Dashboard: React.FC = () => {
               CURRENT PLAN
             </span>
             <h3 style={{ margin: '0 0 4px', fontSize: '20px', fontWeight: '900', color: '#0f172a' }}>
-              {plan}
+              {plan.toUpperCase()}
             </h3>
             <p style={{ margin: '0 0 16px', fontSize: '11.5px', color: '#64748b', fontWeight: '500', lineHeight: 1.4 }}>
               Upgrade to unlock more features and advanced tests.
@@ -254,7 +406,7 @@ export const Dashboard: React.FC = () => {
 
       </div>
 
-      {/* ── 2. 4 STAT CARDS ROW (Middle Row - Exact Layout) ── */}
+      {/* ── 2. 4 STAT CARDS ROW (Dynamic Metrics) ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '18px', marginBottom: '24px' }}>
         
         {/* Card 1: Total Tests */}
@@ -275,10 +427,10 @@ export const Dashboard: React.FC = () => {
               Total Tests
             </span>
             <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
-              {stats.total || 18}
+              {stats.total}
             </strong>
             <span style={{ fontSize: '11px', fontWeight: '700', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '2px', marginTop: '2px' }}>
-              ↑ 12% <span style={{ color: '#94a3b8', fontWeight: '500' }}>from last month</span>
+              ↑ Active <span style={{ color: '#94a3b8', fontWeight: '500' }}>practice count</span>
             </span>
           </div>
         </div>
@@ -301,7 +453,7 @@ export const Dashboard: React.FC = () => {
               Ongoing Tests
             </span>
             <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
-              {stats.ongoing || 1}
+              {stats.ongoing}
             </strong>
             <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '2px', display: 'block' }}>
               In Progress
@@ -327,10 +479,10 @@ export const Dashboard: React.FC = () => {
               Completed Tests
             </span>
             <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
-              {stats.completed || 13}
+              {stats.completed}
             </strong>
             <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '2px', display: 'block' }}>
-              72% completion rate
+              {stats.completionRate}% completion rate
             </span>
           </div>
         </div>
@@ -353,7 +505,7 @@ export const Dashboard: React.FC = () => {
               Average Score
             </span>
             <strong style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', lineHeight: 1.1, display: 'block' }}>
-              {stats.avgScore || 78}%
+              {stats.avgScore}%
             </strong>
             <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '2px', display: 'block' }}>
               Across all tests
@@ -363,13 +515,13 @@ export const Dashboard: React.FC = () => {
 
       </div>
 
-      {/* ── 3. LOWER MAIN GRID (2 Columns) ── */}
+      {/* ── 3. LOWER MAIN GRID (Dynamic Chart & Recent Activity) ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px', marginBottom: '24px' }}>
         
         {/* LEFT COLUMN: Performance Chart & Recent Activity Stack */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Card 1: Performance Overview */}
+          {/* Card 1: Dynamic Performance Overview */}
           <div style={{
             background: '#ffffff', borderRadius: '24px', padding: '24px',
             border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
@@ -384,16 +536,49 @@ export const Dashboard: React.FC = () => {
                     Performance Overview
                   </h3>
                   <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
-                    Your test performance over the last 7 sessions
+                    Your test performance over time ({filterPeriod})
                   </p>
                 </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={{ display: 'flex', gap: '6px' }}>
-                  <button style={{ padding: '6px 14px', borderRadius: '10px', background: '#7c3aed', color: '#ffffff', border: 'none', fontWeight: '800', fontSize: '11.5px', cursor: 'pointer' }}>7D</button>
-                  <button style={{ padding: '6px 14px', borderRadius: '10px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: '700', fontSize: '11.5px', cursor: 'pointer' }}>30D</button>
-                  <button style={{ padding: '6px 14px', borderRadius: '10px', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: '700', fontSize: '11.5px', cursor: 'pointer' }}>All</button>
+                  <button
+                    onClick={() => setFilterPeriod('7D')}
+                    style={{
+                      padding: '6px 14px', borderRadius: '10px',
+                      background: filterPeriod === '7D' ? '#7c3aed' : '#f8fafc',
+                      color: filterPeriod === '7D' ? '#ffffff' : '#64748b',
+                      border: filterPeriod === '7D' ? 'none' : '1px solid #e2e8f0',
+                      fontWeight: '800', fontSize: '11.5px', cursor: 'pointer'
+                    }}
+                  >
+                    7D
+                  </button>
+                  <button
+                    onClick={() => setFilterPeriod('30D')}
+                    style={{
+                      padding: '6px 14px', borderRadius: '10px',
+                      background: filterPeriod === '30D' ? '#7c3aed' : '#f8fafc',
+                      color: filterPeriod === '30D' ? '#ffffff' : '#64748b',
+                      border: filterPeriod === '30D' ? 'none' : '1px solid #e2e8f0',
+                      fontWeight: '800', fontSize: '11.5px', cursor: 'pointer'
+                    }}
+                  >
+                    30D
+                  </button>
+                  <button
+                    onClick={() => setFilterPeriod('All')}
+                    style={{
+                      padding: '6px 14px', borderRadius: '10px',
+                      background: filterPeriod === 'All' ? '#7c3aed' : '#f8fafc',
+                      color: filterPeriod === 'All' ? '#ffffff' : '#64748b',
+                      border: filterPeriod === 'All' ? 'none' : '1px solid #e2e8f0',
+                      fontWeight: '800', fontSize: '11.5px', cursor: 'pointer'
+                    }}
+                  >
+                    All
+                  </button>
                 </div>
               </div>
             </div>
@@ -413,7 +598,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 2: Recent Test Activity */}
+          {/* Card 2: Recent Test Activity (Dynamic Table) */}
           <div style={{
             background: '#ffffff', borderRadius: '24px', padding: '24px',
             border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
@@ -456,67 +641,57 @@ export const Dashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {recentTests.length > 0 ? (
-                    recentTests.map((t: any, idx: number) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '14px', fontWeight: '800', color: '#0f172a' }}>
-                          {t.testname || 'Practice Test'}
-                        </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', fontWeight: '700', fontSize: '11.5px' }}>
-                            {Array.isArray(t.category) ? t.category[0] : t.category || 'General'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '14px', color: '#64748b', fontWeight: '500' }}>
-                          {new Date(t.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </td>
-                        <td style={{ padding: '14px', fontWeight: '900', color: '#16a34a' }}>
-                          {t.score ? `${t.score}%` : 'N/A'}
-                        </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#dcfce7', color: '#16a34a', fontWeight: '700', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckCircle2 size={12} /> Completed
-                          </span>
-                        </td>
-                        <td style={{ padding: '14px', textAlign: 'right' }}>
-                          <button
-                            onClick={() => navigate(`/panel/test/${t._id}`)}
-                            style={{ padding: '6px 14px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#6366f1', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    recentTests.map((t: any, idx: number) => {
+                      const categoryName = Array.isArray(t.category) ? t.category[0] : t.category || 'General';
+                      const scoreVal = typeof t.score === 'number' ? Math.round(t.score) : parseFloat(t.score) || 0;
+                      const dateStr = new Date(t.createdAt || t.submitTime || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                      return (
+                        <tr key={t._id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '14px', fontWeight: '800', color: '#0f172a' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ width: '26px', height: '26px', borderRadius: '8px', background: '#f3e8ff', color: '#7c3aed', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                                <FileText size={13} />
+                              </span>
+                              <span>{t.testname || `${categoryName} Practice`}</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '14px' }}>
+                            <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', fontWeight: '700', fontSize: '11.5px' }}>
+                              {categoryName}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px', color: '#64748b', fontWeight: '500' }}>
+                            {dateStr}
+                          </td>
+                          <td style={{ padding: '14px', fontWeight: '900', color: scoreVal >= 70 ? '#16a34a' : '#e11d48' }}>
+                            {scoreVal}%
+                          </td>
+                          <td style={{ padding: '14px' }}>
+                            <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#dcfce7', color: '#16a34a', fontWeight: '700', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <CheckCircle2 size={12} /> Completed
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px', textAlign: 'right' }}>
+                            <button
+                              onClick={() => navigate(t._id ? `/panel/reports` : '/panel/create')}
+                              style={{ padding: '6px 14px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#6366f1', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
-                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '14px', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#ffe4e6', color: '#e11d48', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                          <FileText size={14} />
-                        </span>
-                        CISSP Practice Test
-                      </td>
-                      <td style={{ padding: '14px' }}>
-                        <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', fontWeight: '700', fontSize: '11.5px' }}>
-                          Security & Risk
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px', color: '#64748b', fontWeight: '500' }}>
-                        24 Sep 2026
-                      </td>
-                      <td style={{ padding: '14px', fontWeight: '900', color: '#16a34a' }}>
-                        82%
-                      </td>
-                      <td style={{ padding: '14px' }}>
-                        <span style={{ padding: '4px 10px', borderRadius: '8px', background: '#dcfce7', color: '#16a34a', fontWeight: '700', fontSize: '11.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          ✓ Completed
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px', textAlign: 'right' }}>
+                    <tr>
+                      <td colSpan={6} style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontWeight: '600' }}>
+                        No practice tests taken yet.{' '}
                         <button
                           onClick={() => navigate('/panel/create')}
-                          style={{ padding: '6px 14px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#6366f1', fontWeight: '800', fontSize: '12px', cursor: 'pointer' }}
+                          style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: '800', cursor: 'pointer', textDecoration: 'underline' }}
                         >
-                          View
+                          Create your first test now
                         </button>
                       </td>
                     </tr>
@@ -528,7 +703,7 @@ export const Dashboard: React.FC = () => {
 
         </div>
 
-        {/* RIGHT COLUMN: Trending Topics Card */}
+        {/* RIGHT COLUMN: Trending Topics Card (Dynamic Ranks) */}
         <div style={{
           background: '#ffffff', borderRadius: '24px', padding: '24px',
           border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
@@ -557,24 +732,24 @@ export const Dashboard: React.FC = () => {
 
           {/* Trending Domain Items */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
-            {TRENDING.map((t) => {
-              const IconComp = t.icon;
+            {trendingTopics.map((t) => {
+              const IconComp = t.icon || Shield;
               return (
-                <div key={t.rank} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
                     width: '34px', height: '34px', borderRadius: '10px',
-                    background: t.bg, color: t.color, display: 'grid', placeItems: 'center', flexShrink: 0
+                    background: t.bg || '#f3e8ff', color: t.color || '#7c3aed', display: 'grid', placeItems: 'center', flexShrink: 0
                   }}>
                     <IconComp size={18} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                         {t.name}
                       </span>
                     </div>
                     <div style={{ height: '5px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${t.pct}%`, background: t.color, borderRadius: '4px' }} />
+                      <div style={{ height: '100%', width: `${Math.min(100, Math.max(5, t.pct))}%`, background: t.color || '#7c3aed', borderRadius: '4px' }} />
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
@@ -596,7 +771,7 @@ export const Dashboard: React.FC = () => {
 
       </div>
 
-      {/* ── 4. QUICK ACTIONS SECTION (Preserved at bottom) ── */}
+      {/* ── 4. QUICK ACTIONS SECTION ── */}
       <h3 style={{ margin: '24px 0 16px', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>Quick Actions</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         <ActionCard icon="⚡" title="Start Practice Test" desc="Choose your domain and begin a timed assessment." gradient="linear-gradient(135deg,#7c3aed,#a78bfa)" onClick={() => navigate('/panel/create')} />

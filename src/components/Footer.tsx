@@ -1,149 +1,104 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useCMS } from '../utils/useCMS';
+import { ArrowRight, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Button } from './ui/button';
 
 export const Footer: React.FC = () => {
-  const { t } = useCMS();
   return (
-    <section className="rt-site-footer deafult-footer has-callto-action">
-      <div className="container-fluid rt-mb-0 rt-p-0">
-        <div className="row rt-mb-0 rt-p-0">
-          <div className="col-12 rt-mb-0 rt-p-0">
-            <div className="footer-calltoaction buyDomain rt-p-50 rt-p-md-40 rt-p-xs-30 d-flex flex-lg-row flex-column align-items-center rtbgprefix-cover text-white justify-content-start"
-                 style={{ backgroundImage: "url(/marketing-assets/images/banner/buyDomainCTA.png)" }}>
-              <div className="container">
-                <div className="row">
-                  <div className="col-lg-12">
-                    <div className="cta-content">
-                      <h4 className="wow fade-in-top f-size-40 f-size-lg-40 f-size-md-32 f-size-xs-24 rt-strong rt-mb-15 text-white"
-                          data-wow-duration="1s" data-wow-delay="0.2s">
-                        24/7 Human-Led Tech Support
-                      </h4>
-                      <a href="mailto:support@csqna.com"
-                         className="rt-pt-10 rt-btn rt-sm2 rt-gradient text-uppercase rt-Bshadow-2 wow fade-in-left pill"
-                         data-wow-duration="1s" data-wow-delay="0.6s">
-                        Connect with an Expert
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <footer className="relative border-t border-slate-200/60 bg-[#F8FAFC] text-foreground font-sans">
+      {/* 24/7 Support Banner */}
+      <div className="bg-gradient-to-r from-purple-50/70 via-slate-50 to-blue-50/70 border-b border-slate-200/50 py-10 px-5">
+        <div className="mx-auto max-w-[1370px] flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-purple">Always Here To Help</span>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground mt-1">24/7 Human-Led Tech Support</h3>
+            <p className="text-sm text-muted-foreground mt-1">Have questions or need guidance on certification practice? Our experts are online.</p>
           </div>
+          <a href="mailto:support@csqna.com">
+            <Button variant="hero" size="hero" className="shrink-0">
+              Connect with an Expert <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </a>
         </div>
       </div>
 
-      <div className="footer-top">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-3 col-md-6">
-              <div className="rt-single-widget wow fade-in-bottom">
-                <a href="https://csqna.com" className="d-block rt-mb-25">
-                  <img src="/marketing-assets/images/logo/FamousDotsLogo.png" alt="CSQNA" draggable="false" className="rt-footer-logo" />
+      {/* Main Footer Content */}
+      <div className="mx-auto max-w-[1370px] px-5 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          
+          {/* Brand Col */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link to="/" className="flex items-center gap-2">
+              <span className="relative grid h-9 w-7 place-items-center text-brand-blue">
+                <ShieldCheck className="h-8 w-8" strokeWidth={1.8} />
+                <span className="absolute text-[7px] font-extrabold text-brand-blue">Q</span>
+              </span>
+              <span>
+                <span className="block text-[28px] font-extrabold leading-[0.85] tracking-normal text-brand-red">CSQNA</span>
+                <span className="block pt-1 text-[6px] font-extrabold uppercase leading-none text-foreground">
+                  Certification practice made simple
+                </span>
+              </span>
+            </Link>
+
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
+              Assess your cybersecurity skills using the Cyber Security Question &amp; Answer platform. Build, test, and certify.
+            </p>
+          </div>
+
+          {/* Col 2: Services */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Our Services</h4>
+            <ul className="space-y-2 text-xs font-medium text-muted-foreground">
+              <li><Link to="/services" className="hover:text-primary transition-colors">Skill Gap Analysis</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Career Growth Training</Link></li>
+              <li><Link to="/pricing" className="hover:text-primary transition-colors">Certification Practice Tests</Link></li>
+            </ul>
+          </div>
+
+          {/* Col 3: Quick Links */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Quick Links</h4>
+            <ul className="space-y-2 text-xs font-medium text-muted-foreground">
+              <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing Plans</Link></li>
+              <li>
+                <a href="https://blog.csqna.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors inline-flex items-center gap-1">
+                  Blogs <ExternalLink className="h-3 w-3" />
                 </a>
-                <p className="f-size-18 rt-light2 f-size-lg-18">{t('footer_tagline', 'Test , Learn , Certify')}</p>
-                <ul className="rt-list rt-mt-15">
-                  <li className="d-inline-block">
-                    <a href="https://www.youtube.com/@opensecurityalliance" target="_blank" rel="noopener noreferrer" className="rt-hw-40 text-center icon-white-secondary d-block rt-circle rt-mr-4">
-                      <i className="fab fa-youtube" aria-hidden="true"></i>
-                    </a>
-                  </li>
-                  <li className="d-inline-block">
-                    <a href="https://www.linkedin.com/in/dineshbareja" target="_blank" rel="noopener noreferrer" className="rt-hw-40 text-center icon-white-secondary d-block rt-circle rt-mr-4">
-                      <i className="fab fa-linkedin" aria-hidden="true"></i>
-                    </a>
-                  </li>
-                  <li className="d-inline-block">
-                    <a href="https://x.com/bizsprite" target="_blank" rel="noopener noreferrer" className="rt-hw-40 text-center icon-white-secondary d-block rt-circle rt-mr-4">
-                      <i className="fab fa-twitter" aria-hidden="true"></i>
-                    </a>
-                  </li>
-                  <li className="d-inline-block">
-                    <a href="https://www.facebook.com/groups/1086339578554034" target="_blank" rel="noopener noreferrer" className="rt-hw-40 text-center icon-white-secondary d-block rt-circle rt-mr-4">
-                      <i className="fab fa-facebook" aria-hidden="true"></i>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+              </li>
+              <li>
+                <a href="https://opportunities.csqna.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors inline-flex items-center gap-1">
+                  Jobs <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+            </ul>
+          </div>
 
-            <div className="col-lg-3 col-md-6">
-              <div className="rt-single-widget wow fade-in-bottom" data-wow-duration="1s" data-wow-delay="0.1s">
-                <h3 className="rt-footer-title">Our Services</h3>
-                <ul className="rt-usefulllinks2">
-                  <li><Link to="/services"> <i className="icofont-thin-double-right"></i>Skill Gap Analysis</Link></li>
-                  <li><Link to="/services"><i className="icofont-thin-double-right"></i>Career Growth Training</Link></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="col-lg-3 col-md-6">
-              <div className="rt-single-widget wow fade-in-bottom" data-wow-duration="1.3s" data-wow-delay="0.3s">
-                <h3 className="rt-footer-title">Quick Links</h3>
-                <ul className="rt-usefulllinks2">
-                  <li><Link to="/about"> <i className="icofont-thin-double-right"></i>About Us</Link></li>
-                  <li><a href="https://blog.csqna.com" target="_blank" rel="noopener noreferrer"><i className="icofont-thin-double-right"></i>Blogs</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="col-lg-3 col-md-6">
-              <div className="rt-single-widget wow fade-in-bottom" data-wow-duration="1.6s" data-wow-delay="0.6s">
-                <h3 className="rt-footer-title">Legal</h3>
-                <ul className="rt-usefulllinks2">
-                  <li><Link to="/privacy-policy"> <i className="icofont-thin-double-right"></i>Privacy Policy</Link></li>
-                  <li><Link to="/terms-and-conditions"><i className="icofont-thin-double-right"></i>Terms Of Service</Link></li>
-                  <li><Link to="/user-consent-agreement"><i className="icofont-thin-double-right"></i>User Consent Statement</Link></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="col-md-6">
-              <div className="rt-single-icon-box rt-rounded-10 border-style-1 align-items-center rt-pt-15 rt-pb-15 rt-mt-50 rt-pl-20 rt-pr-20 rt-mb-50">
-                <div className="icon-thumb">
-                  <img src="/marketing-assets/images/all-img/email_contact_us_FamousDots.png" alt="box-icon" draggable="false" />
-                </div>
-                <div className="iconbox-content">
-                  <h5 className="f-size-24 rt-normal rt-mb-10">Email For Assistance</h5>
-                  <p className="f-size-18 line-height-34 rt-light3 rt-mb-0">
-                    <a href="mailto:sales@csqna.com">sales@csqna.com</a>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6">
-              <div className="rt-single-icon-box rt-rounded-10 border-style-1 align-items-center rt-pt-15 rt-pb-15 rt-mt-50 rt-pl-20 rt-pr-20 rt-mb-50">
-                <div className="icon-thumb">
-                  <img src="/marketing-assets/images/all-img/Contact_FamousDots.png" alt="box-icon" draggable="false" />
-                </div>
-                <div className="iconbox-content">
-                  <h5 className="f-size-24 rt-normal rt-mb-10">Contact For Queries</h5>
-                  <p className="f-size-18 line-height-34 rt-light3 rt-mb-0">
-                    <a href={`mailto:${t('footer_email', 'support@csqna.com')}`}>{t('footer_email', 'support@csqna.com')}</a>
-                    &nbsp;&bull;&nbsp;
-                    <a href={`tel:${t('footer_phone', '+91 91372 73947').replace(/\s+/g, '')}`}>{t('footer_phone', '+91 91372 73947')}</a>
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Col 4: Legal */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Legal &amp; Compliance</h4>
+            <ul className="space-y-2 text-xs font-medium text-muted-foreground">
+              <li><Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link to="/user-consent-agreement" className="hover:text-primary transition-colors">User Consent Statement</Link></li>
+            </ul>
           </div>
         </div>
       </div>
 
-      <div className="footer-bottom">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12 text-center copy-right-text">
-              <div className="disclaimer-box text-center rt-mb-20" style={{ fontSize: '13px', opacity: 0.8, color: '#94A3B8', maxWidth: '800px', margin: '0 auto 15px auto', lineHeight: '1.6' }}>
-                <strong>Disclaimer:</strong> CSQNA is an independent educational provider of practice tests and study materials. CISA, CISSP, CIPP, CEH, and other certification names/registered trademarks are properties of their respective owners (such as ISACA, ISC², IAPP, EC-Council). CSQNA is not affiliated with, authorized, sponsored, or endorsed by any of these certification owners.
-              </div>
-              {t('footer_copyright', 'Copyright © 2026-2030. All Rights Reserved By')} <a href="https://csqna.com" className="primary-color">CSQNA</a>
-            </div>
-          </div>
+      {/* Bottom Copyright & Disclaimer */}
+      <div className="border-t border-slate-200 bg-white py-5 px-5">
+        <div className="mx-auto max-w-[1370px] text-center space-y-2">
+          <p className="text-[10px] text-muted-foreground leading-relaxed max-w-4xl mx-auto">
+            <strong>Disclaimer:</strong> CSQNA is an independent educational provider of practice tests and study materials. CISA, CISSP, CIPP, CEH, and other certification names/registered trademarks are properties of their respective owners (such as ISACA, ISC², IAPP, EC-Council). CSQNA is not affiliated with, authorized, sponsored, or endorsed by any of these certification owners.
+          </p>
+          <p className="text-xs text-muted-foreground font-semibold">
+            Copyright © 2026-2030. All Rights Reserved By <Link to="/" className="text-brand-purple font-bold">CSQNA</Link>
+          </p>
         </div>
       </div>
-    </section>
+    </footer>
   );
 };
 

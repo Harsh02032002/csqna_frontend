@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, FileQuestion, Globe, Lock, Minus, Plus, Shield, Target } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 import { useCMS } from '../../utils/useCMS';
 
 export const Dpdp: React.FC = () => {
@@ -33,140 +36,71 @@ export const Dpdp: React.FC = () => {
     }
   ];
 
+  const dpdpDomains = [
+    { num: "01", title: "Data Principal Rights & Consent", desc: "Notice requirements, verifiable parental consent, right to correction, erasure, and grievance redressal." },
+    { num: "02", title: "Data Fiduciary Obligations", desc: "Lawful processing, data accuracy maintenance, technical safeguards, and breach notification to Data Protection Board." },
+    { num: "03", title: "Significant Data Fiduciaries", desc: "Data Protection Officer (DPO) mandate, independent data audits, and periodic privacy impact evaluations." },
+  ];
+
   return (
-    <div className="cert-page">
-      <div className="rt-breadcump breaducump-style-2" style={{ 
-        position: 'relative', 
-        height: '280px', 
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #021a1a 0%, #083c3e 100%)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)'
-      }}>
-        {/* Abstract Grid/Dot Pattern */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-          opacity: 0.4
-        }}></div>
-        {/* Glow circles */}
-        <div style={{
-          position: 'absolute',
-          top: '-20%',
-          right: '10%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(20, 184, 166, 0.4) 0%, transparent 70%)',
-          filter: 'blur(30px)'
-        }}></div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-x-hidden antialiased selection:bg-purple-500 selection:text-white">
 
-        {/* Dynamic SVG Object on the Right */}
-        <div style={{
-          position: 'absolute',
-          right: '8%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '180px',
-          height: '180px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1
-        }}>
-          <svg width="130" height="130" viewBox="0 0 24 24" fill="none" stroke="url(#dpdpGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 15px rgba(20, 184, 166, 0.5))' }}>
-            <defs>
-              <linearGradient id="dpdpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#2dd4bf" />
-                <stop offset="100%" stopColor="#0d9488" />
-              </linearGradient>
-            </defs>
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            <path d="M9 12l2 2 4-4" />
-          </svg>
-        </div>
-
-        <div style={{ position: 'relative', zIndex: 2 }} className="container">
-          <div className="row align-items-left" style={{ paddingTop: '80px' }}>
-            <div className="col-lg-7 col-md-9">
-              <div className="disclaimer-banner">
-                <span className="disclaimer-title">⚠️ Disclaimer:</span>
-                <span className="disclaimer-text">We are not affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with the Government of India.</span>
-              </div>
-              <h1 className="f-size-50 f-size-lg-40 f-size-md-30 f-size-xs-22 rt-strong text-uppercase" data-content-key="dpdp_banner_title">
-                {t('dpdp_banner_title', 'DPDP ACT 2023')}
-              </h1>
-            </div>
-          </div>
-        </div>
+      <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-xs text-amber-800">
+        <span className="font-bold">⚠️ Disclaimer:</span> We are not affiliated with MeitY or any Indian government body. This content is for educational and exam preparation purposes only.
       </div>
 
-      <div className="rt-spacer-10"></div>
-
-      <section className="page-content-area bg-elements-parent">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-7 text-left">
-
-              <p className="rt-light3 f-size-20 line-height-34 rt-mb-20 font-weight-bold" data-content-key="dpdp_hero_subtitle">
-                {t('dpdp_hero_subtitle', "Digital Personal Data Protection Compliance - India's Comprehensive Data Protection Law")}
-              </p>
-              <p className="f-size-16 line-height-30" data-content-key="dpdp_hero_desc">
-                {t('dpdp_hero_desc', 'A landmark legislation establishing a robust framework for personal data protection, balancing individual digital rights with organizational needs for lawful processing.')}
-              </p>
-              <div className="rt-spacer-30"></div>
-              <div className="d-flex gap-3">
-                <a href="#exam-details" className="rt-btn rt-gradient pill text-uppercase rt-Bshadow-1 rt-sm2">Compliance Details</a>
-                <a href="#eligibility" className="rt-btn pill text-uppercase rt-sm2 bg-secondary text-white">Check Obligations</a>
-              </div>
+      <section className="relative py-8 lg:py-12 px-4 sm:px-6 lg:px-8 max-w-[1340px] mx-auto overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="lg:col-span-7 z-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E3F2FD] text-[#2563EB] text-[11px] font-extrabold uppercase tracking-widest border border-[#BFDBFE] shadow-sm mb-4">
+              <Shield className="h-3.5 w-3.5 text-[#2563EB]" />
+              <span>INDIA DPDP ACT 2023 COMPLIANCE</span>
             </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight mb-4">
+              DPDP <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Data Protection</span> Practice Tests
+            </h1>
+            <p className="text-[#64748B] text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mb-8">
+              Practice test sets for Data Protection Fiduciaries, Data Processors, Data Principal rights, and DPDP compliance obligations aligned with official 2023 regulatory rules.
+            </p>
+            <div className="flex flex-wrap gap-4 mb-8">
+              <Link to="/register">
+                <Button variant="hero" size="hero" className="px-8 shadow-lg">START DPDP PRACTICE FREE <ArrowRight className="h-4 w-4" /></Button>
+              </Link>
+              <Link to="/pricing">
+                <Button variant="heroOutline" size="hero" className="px-7">VIEW PRICING PLANS</Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-200/80">
+              {["700+ Questions", "DPDP Act 2023", "DPO Mandate", "Compliance Ready"].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /><span>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-            <div className="col-lg-5 mt-5 mt-lg-0">
-              <div className="credential-card text-left">
-                <div className="d-flex justify-content-between align-items-start mb-4">
-                  <div className="d-flex align-items-center gap-2">
-                    <div className="d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                      <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>★</span>
-                    </div>
-                    <div>
-                      <h4 className="text-uppercase m-0" style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '1px', color: '#d8b4fe' }}>CSQNA Compliance Pack</h4>
-                      <p className="m-0" style={{ fontSize: '9px', color: '#94a3b8' }}>VERIFIED COMPLIANCE STUDY</p>
-                    </div>
+          <div className="lg:col-span-5 relative flex justify-center">
+            <div className="relative w-full max-w-[420px]">
+              <div className="absolute -top-5 right-2 text-blue-600 font-extrabold text-xs tracking-wider rotate-6 flex items-center gap-1 z-20">
+                <span>Data Privacy<br />Officer Prep</span><span className="text-xl">⤵</span>
+              </div>
+              <div className="relative rounded-3xl bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-900 p-7 text-white shadow-2xl border border-blue-500/20 overflow-hidden">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-blue-300 text-[10px] font-extrabold uppercase tracking-widest border border-white/10">DPDP ACT 2023</span>
+                  <Lock className="h-6 w-6 text-blue-300" />
+                </div>
+                <div className="space-y-4 my-6">
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div><div className="text-[10px] font-bold text-blue-200">DPDP QUESTIONS</div><div className="text-2xl font-black text-white">700+</div></div>
+                    <FileQuestion className="h-8 w-8 text-blue-300" />
                   </div>
-                  <div>
-                    <span className="badge bg-success text-white" style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '50px' }}>Active</span>
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div><div className="text-[10px] font-bold text-blue-200">COMPLIANCE DOMAINS</div><div className="text-2xl font-black text-white">3 Modules</div></div>
+                    <Globe className="h-8 w-8 text-indigo-300" />
                   </div>
                 </div>
-
-                <div className="mb-4">
-                  <h3 className="text-white text-uppercase mb-1" style={{ fontSize: '20px', fontWeight: 'bold' }}>DPDP Act</h3>
-                  <p className="mb-3" style={{ fontSize: '12px', color: '#cbd5e1' }}>Digital Personal Data Protection</p>
-                  
-                  <div className="p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
-                    <div className="row">
-                      <div className="col-6">
-                        <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase' }}>Scope</span>
-                        <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fbbf24' }}>India / Global</span>
-                      </div>
-                      <div className="col-6">
-                        <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase' }}>Stakeholders</span>
-                        <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fbbf24' }}>4 roles</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="d-flex justify-content-between align-items-center pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '8px', color: '#94a3b8', textTransform: 'uppercase' }}>Support Email</span>
-                    <span style={{ fontSize: '11px', color: '#d8b4fe' }}>info@csqna.com</span>
-                  </div>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#fbbf24' }}>SEAL</span>
-                  </div>
+                <div className="pt-2 flex items-center justify-between text-[11px] font-bold text-blue-200">
+                  <span>Data Fiduciary Obligations</span><span className="text-emerald-400">100% Updated</span>
                 </div>
               </div>
             </div>
@@ -174,111 +108,59 @@ export const Dpdp: React.FC = () => {
         </div>
       </section>
 
-      <div className="rt-spacer-100"></div>
-      <section id="exam-details" style={{ background: '#F6F7FA', padding: '60px 0' }}>
-        <div className="container">
-          <h2 className="rt-section-title text-center">DPDP Compliance Details</h2>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { title: 'Territorial Scope', desc: 'Applies to processing personal data in India. Also applies outside India if in connection with offering goods/services to individuals in India.' },
-              { title: 'Maximum Penalty', desc: 'Fines up to ₹250 crores (~$30 million USD) for failing to prevent data breaches. Enforced by the Data Protection Board of India.' },
-              { title: 'Key Regulator', desc: 'Data Protection Board of India (DPBI) established as statutory body to enforce compliance and resolve grievances.' },
-              { title: 'DPO Requirement', desc: 'Significant Data Fiduciaries (SDFs) must appoint an India-based Data Protection Officer responsible directly to the board.' },
-              { title: 'Consent Standard', desc: 'Consent must be free, specific, informed, unconditional, and unambiguous with a clear notice accompanying it.' },
-              { title: 'Notice Language', desc: 'Notice must be in English or any of the 22 languages listed in the 8th Schedule of the Indian Constitution.' }
-            ].map((item, i) => (
-              <div className="col-md-4 col-sm-6 rt-mb-30" key={i}>
-                <div className="blue-block" style={{ height: '100%', padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#854c93' }}>{item.title}</h3>
-                  <p className="mt-2">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <main className="py-6 sm:py-10 space-y-16 max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div className="rt-spacer-100"></div>
-      <section id="domains" className="page-content-area">
-        <div className="container">
-          <h2 className="rt-section-title text-center">Key Stakeholders</h2>
-          <p className="text-center section-p-content max-w-2xl mx-auto">
-            {t('dpdp_domains_intro', 'The DPDP Act establishes specific roles with defined responsibilities and rights for entities involved in personal data processing.')}
-          </p>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { icon: '👤', title: 'Data Principal', desc: 'The individual to whom the personal data relates. Has rights to access, correction, erasure, and grievance redressal.', badge: 'Key Stakeholder 1' },
-              { icon: '🏢', title: 'Data Fiduciary', desc: 'The entity determining the purpose and means of data processing. Responsible for ensuring compliance and security safeguards.', badge: 'Key Stakeholder 2' },
-              { icon: '🛡️', title: 'Significant Data Fiduciary', desc: 'Designated organizations meeting thresholds of data volume, sensitivity, or risk. Subject to audits and DPIA requirements.', badge: 'Key Stakeholder 3' },
-              { icon: '⚙️', title: 'Data Processor', desc: 'The entity processing digital personal data on behalf of a Data Fiduciary. Must follow instructions of the fiduciary.', badge: 'Key Stakeholder 4' }
-            ].map((d, i) => (
-              <div className="col-md-3 col-sm-6 rt-mb-30" key={i}>
-                <div className="blue-block text-center" style={{ height: '100%', padding: '25px', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '40px', marginBottom: '15px' }}>{d.icon}</div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>{d.title}</h3>
-                  <p className="f-size-14">{d.desc}</p>
-                  <span style={{ display: 'inline-block', background: '#854c93', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold', marginTop: '10px', fontSize: '13px' }}>{d.badge}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="rt-spacer-100"></div>
-      <section id="eligibility" style={{ background: '#F6F7FA', padding: '60px 0' }}>
-        <div className="container">
-          <h2 className="rt-section-title text-center">Compliance Obligations</h2>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { title: 'Notice and Consent', items: ['Fiduciaries must provide a clear notice detailing personal data items collected and purpose of processing.', 'Must offer option to withdraw consent easily in-app or via email.'] },
-              { title: 'Reasonable Security', items: ['Implement reasonable security safeguards to prevent personal data breaches.', 'Required to notify the DPBI and affected individuals in case of a breach.'] },
-              { title: 'Data Minimization & Erasure', items: ['Only collect data that is necessary for the specified purpose.', 'Delete and erase personal data as soon as the purpose is served or consent is withdrawn.'] }
-            ].map((card, i) => (
-              <div className="col-md-4 rt-mb-30" key={i}>
-                <div style={{ padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0', height: '100%' }}>
-                  <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#854c93', marginBottom: '15px' }}>{card.title}</h3>
-                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', color: '#555' }}>
-                    {card.items.map((item, j) => <li className="rt-mb-10" key={j}>{item}</li>)}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="rt-spacer-100"></div>
-      <section id="faq" className="faq-area bg-elements-parent">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12">
-              <h2 className="rt-section-title">Frequently Asked Questions</h2>
-              <p className="rt-light3 line-height-34 rt-mb-0 section-p-content">Find answers to the most frequently asked questions here</p>
-              <div className="rt-spacer-30"></div>
-              <div id="accordion">
-                {faqs.map((faq, index) => {
-                  const isOpen = activeFaq === index;
-                  return (
-                    <div className="faq-card" key={index}>
-                      <div className="faq-header" onClick={() => setActiveFaq(isOpen ? null : index)}>
-                        <h5 data-content-key={faq.key_q}>{t(faq.key_q, faq.question)}</h5>
-                        <div className="faq-icon" style={{ backgroundColor: '#854c93', color: '#fff' }}>{isOpen ? '−' : '+'}</div>
-                      </div>
-                      {isOpen && <div className="faq-body" data-content-key={faq.key_a}>{t(faq.key_a, faq.answer)}</div>}
-                    </div>
-                  );
-                })}
-              </div>
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E3F2FD] text-[#2563EB] text-[11px] font-extrabold uppercase tracking-widest border border-[#BFDBFE] shadow-sm mb-3">
+              <Target className="h-3.5 w-3.5 text-[#2563EB]" /><span>DPDP ACT COMPLIANCE MODULES</span>
             </div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">Data Principal &amp; Fiduciary Obligations</h2>
           </div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {dpdpDomains.map((d) => (
+              <div key={d.num} className="group rounded-3xl bg-white p-7 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 font-black text-sm flex items-center justify-center mb-5">{d.num}</div>
+                  <h3 className="text-lg font-bold text-[#0F172A] mb-3 leading-snug group-hover:text-blue-600 transition-colors">{d.title}</h3>
+                  <p className="text-xs sm:text-sm font-medium text-[#64748B] leading-relaxed mb-6">{d.desc}</p>
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+                  <span>Practice Module</span><ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <div className="rt-spacer-100"></div>
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] leading-tight mb-2">Frequently Asked Questions</h2>
+            <p className="text-sm font-medium text-[#64748B]">Find answers to the most common questions about the DPDP Act</p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-3" id="accordion">
+            {faqs.map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <div key={index} className={`rounded-2xl border transition-all duration-200 ${isOpen ? 'border-blue-200 bg-blue-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                  <button className="w-full flex items-center justify-between p-5 text-left" onClick={() => setActiveFaq(isOpen ? null : index)}>
+                    <span className="font-bold text-sm text-[#0F172A] leading-snug pr-4">{t(faq.key_q, faq.question)}</span>
+                    <span className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${isOpen ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {isOpen ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-blue-100 pt-4">
+                      {t(faq.key_a, faq.answer)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 };

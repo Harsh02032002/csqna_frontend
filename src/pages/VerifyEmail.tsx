@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { Button } from '../components/ui/button';
 import api from '../utils/api';
 
 export const VerifyEmail: React.FC = () => {
@@ -37,40 +39,44 @@ export const VerifyEmail: React.FC = () => {
   }, [token, navigate]);
 
   return (
-    <div className="container-fluid d-flex align-items-center justify-content-center" style={{ minHeight: 'calc(100vh - 100px)', background: '#f8fafc', paddingTop: '100px' }}>
-      <div className="card text-center shadow-lg border-0 p-5" style={{ maxWidth: '500px', width: '100%', borderRadius: '16px', background: '#fff' }}>
-        <div className="card-body">
-          {loading ? (
-            <div className="mb-4">
-              <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-                <span className="visually-hidden">Loading...</span>
-              </div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 flex flex-col justify-center items-center px-4 py-12 antialiased selection:bg-purple-500 selection:text-white">
+      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/80 p-8 text-center shadow-[0_10px_35px_rgba(0,0,0,0.03)] space-y-6">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center space-y-4 py-4">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+              <Loader2 className="h-8 w-8 animate-spin" />
             </div>
-          ) : success ? (
-            <div className="mb-4 text-success" style={{ color: '#22c55e' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" className="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-              </svg>
+            <h2 className="text-xl font-black text-[#0F172A]">Verifying Email...</h2>
+          </div>
+        ) : success ? (
+          <div className="flex flex-col items-center justify-center space-y-4 py-4">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+              <CheckCircle2 className="h-8 w-8" />
             </div>
-          ) : (
-            <div className="mb-4 text-danger" style={{ color: '#ef4444' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" className="bi bi-x-circle-fill" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-              </svg>
+            <h2 className="text-xl font-black text-emerald-600">Verification Successful!</h2>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center space-y-4 py-4">
+            <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+              <XCircle className="h-8 w-8" />
             </div>
-          )}
+            <h2 className="text-xl font-black text-rose-600">Verification Failed</h2>
+          </div>
+        )}
 
-          <h3 className={`mb-3 ${success ? 'text-success' : !loading ? 'text-danger' : 'text-dark'}`} style={{ fontWeight: 'bold' }}>
-            {success ? 'Success!' : !loading ? 'Failed!' : 'Verifying...'}
-          </h3>
-          <p className="text-secondary mb-4" style={{ fontSize: '15px', lineHeight: '1.6' }}>{message}</p>
+        <p className="text-sm font-medium text-[#64748B] leading-relaxed">
+          {message}
+        </p>
 
-          {!loading && (
-            <Link to="/login" className="btn text-white w-100 py-3 px-4" style={{ background: 'linear-gradient(to right, #e21b5a, #f2722c)', borderRadius: '50px', fontWeight: 'bold', border: 'none', display: 'block', textDecoration: 'none' }}>
-              Go to Login
+        {!loading && (
+          <div className="pt-2">
+            <Link to="/login">
+              <Button size="hero" className="w-full bg-gradient-to-r from-[#FF3B30] to-[#FF9500] hover:opacity-95 text-white font-black text-sm py-3.5 rounded-full shadow-lg shadow-orange-500/25 border-0 flex items-center justify-center gap-2">
+                GO TO LOGIN <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

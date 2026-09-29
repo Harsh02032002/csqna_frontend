@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Toast, ToastType } from '../components/ui/Toast';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -8,170 +11,172 @@ export const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [verifyHuman, setVerifyHuman] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; title?: string; message: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!username.trim() || !password.trim()) {
+      const msg = 'Please enter both your username and password.';
+      setError(msg);
+      setToast({ type: 'error', title: 'Missing Credentials', message: msg });
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await login(username, password);
       if (res.success) {
+        setToast({ type: 'success', title: 'Login Successful', message: 'Welcome back!' });
         navigate('/panel/dashboard');
       } else {
-        setError(res.message || 'Invalid username or password.');
+        const msg = res.message || 'Invalid username or password.';
+        setError(msg);
+        setToast({ type: 'error', title: 'Authentication Failed', message: msg });
       }
     } catch {
-      setError('Connection to security auth gateway failed.');
+      const msg = 'Connection to security auth gateway failed.';
+      setError(msg);
+      setToast({ type: 'error', title: 'Network Error', message: msg });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container-fluid p-0" style={{ minHeight: 'calc(100vh - 100px)', display: 'flex', background: '#fff', paddingTop: '100px' }}>
-      <div className="row g-0 w-100" style={{ minHeight: '100%' }}>
-        {/* Left Column - Illustration */}
-        <div className="col-lg-7 d-none d-lg-flex align-items-center justify-content-center" style={{ background: '#f5f8fa', padding: '40px' }}>
-          <img 
-            src="/marketing-assets/images/login/user-login.png" 
-            alt="Login Illustration" 
-            style={{ maxWidth: '80%', height: 'auto', objectFit: 'contain' }} 
-          />
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-x-hidden flex flex-col justify-between antialiased selection:bg-purple-500 selection:text-white relative">
+      
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          duration={5000}
+        />
+      )}
 
-        {/* Right Column - Form */}
-        <div className="col-lg-5 d-flex align-items-center justify-content-center" style={{ padding: '60px 40px', background: '#fff' }}>
-          <div style={{ width: '100%', maxWidth: '420px' }}>
-            <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Log In</h2>
-            <p style={{ fontSize: '15px', color: '#64748b', marginBottom: '35px' }}>Please Enter Your Login Details</p>
+      <main className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8 flex-1 flex items-center justify-center">
+        <div className="w-full max-w-5xl rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.03)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+          
+          {/* Left Artwork */}
+          <div className="lg:col-span-6 bg-gradient-to-br from-purple-900 via-indigo-950 to-slate-900 p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden border-r border-slate-100 text-white">
+            <div className="relative z-10">
+              <Link to="/" className="flex items-center gap-2">
+                <span className="relative grid h-9 w-7 place-items-center text-blue-400">
+                  <ShieldCheck className="h-8 w-8" strokeWidth={1.8} />
+                  <span className="absolute text-[7px] font-extrabold text-blue-300">Q</span>
+                </span>
+                <span>
+                  <span className="block text-[28px] font-extrabold leading-[0.85] tracking-normal text-red-500">CSQNA</span>
+                  <span className="block pt-1 text-[6px] font-extrabold uppercase leading-none text-purple-200">
+                    Certification practice made simple
+                  </span>
+                </span>
+              </Link>
 
-            {error && (
-              <div className="alert alert-danger" style={{ fontSize: '13px', borderRadius: '8px' }}>
-                {error}
+              <div className="mt-12">
+                <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-purple-200 border border-white/20 mb-3">
+                  Candidate Gateway
+                </span>
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Assess Your Cybersecurity Edge</h1>
+                <p className="mt-4 text-xs sm:text-sm text-purple-100/80 font-medium leading-relaxed max-w-md">
+                  Sign in to access your practice tests, track domain readiness, review explanations, and prepare for official certification exams.
+                </p>
               </div>
-            )}
+            </div>
 
-            <form onSubmit={handleSubmit} autoComplete="off">
-              {/* Email / Username field */}
-              <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                  Email / Username
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoComplete="off"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                  placeholder="Enter email or username"
-                />
-              </div>
+            <div className="relative z-10 pt-6 border-t border-white/10 text-xs font-semibold text-purple-200/70">
+              Trusted by 10,000+ cybersecurity professionals worldwide.
+            </div>
+          </div>
 
-              {/* Password field */}
-              <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                  Password
-                </label>
-                <div className="d-flex align-items-center">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{ background: 'transparent', border: 'none', color: '#64748b', outline: 'none', cursor: 'pointer', padding: '0 5px' }}
-                  >
-                    {showPassword ? (
-                      /* Eye Slash Icon */
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    ) : (
-                      /* Eye Icon */
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
+          {/* Right Form */}
+          <div className="lg:col-span-6 p-8 sm:p-12 flex flex-col justify-center bg-white">
+            <div className="max-w-md mx-auto w-full">
+              <h2 className="text-2xl font-black text-[#0F172A] tracking-tight">Candidate Login</h2>
+              <p className="mt-1 text-xs font-semibold text-[#64748B]">Enter your credentials to access your dashboard.</p>
 
-              {/* Verify As Human Checkbox */}
-              <div className="form-check mb-4 text-left d-flex align-items-center">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="verifyAsHuman"
-                  required
-                  style={{ position: 'relative', marginLeft: '0', cursor: 'pointer', width: '16px', height: '16px', marginRight: '8px', marginTop: '0' }}
-                />
-                <label className="form-check-label" htmlFor="verifyAsHuman" style={{ fontSize: '14px', color: '#475569', cursor: 'pointer', fontWeight: '500', userSelect: 'none' }}>
-                  Verify As Human
-                </label>
-              </div>
-
-              {/* Links */}
-              <div className="text-center mb-4" style={{ fontSize: '14px', color: '#475569' }}>
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div>
-                  Don't have an account yet? <Link to="/register" style={{ color: '#3b82f6', fontWeight: '600', textDecoration: 'none' }}>Register Now</Link>
+                  <label className="block text-xs font-bold text-[#0F172A] mb-1.5">Username or Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-[#64748B]" />
+                    <input
+                      type="text"
+                      required
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="username or email@example.com"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                    />
+                  </div>
                 </div>
-                <div className="mt-2">
-                  <Link to="#" onClick={(e) => { e.preventDefault(); alert('Password reset link has been sent to your email.'); }} style={{ color: '#3b82f6', fontWeight: '600', textDecoration: 'none' }}>
-                    Forgot password? Reset Now
+
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-xs font-bold text-[#0F172A]">Password</label>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-[#64748B]" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-10 pr-10 py-3 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-3.5 text-[#64748B] hover:text-[#0F172A]"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="verifyHuman"
+                    required
+                    checked={verifyHuman}
+                    onChange={(e) => setVerifyHuman(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 cursor-pointer accent-purple-600"
+                  />
+                  <label htmlFor="verifyHuman" className="text-xs font-semibold text-[#64748B] cursor-pointer select-none">
+                    I verify that I am human
+                  </label>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  size="hero"
+                  className="w-full h-12 bg-gradient-to-r from-[#FF3B30] to-[#FF9500] hover:opacity-95 text-white font-black text-xs shadow-md mt-2 border-0"
+                >
+                  {loading ? 'LOGGING IN...' : 'LOG IN TO ACCOUNT'} <ArrowRight className="ml-1.5 h-4 w-4" />
+                </Button>
+
+                <div className="pt-4 text-center text-xs font-semibold text-[#64748B] border-t border-slate-100 mt-6">
+                  Don't have an account?{" "}
+                  <Link to="/register" className="text-purple-600 font-bold hover:underline">
+                    Create free account
                   </Link>
                 </div>
-              </div>
-
-              {/* Log In Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-100 d-flex align-items-center justify-content-between text-white"
-                style={{
-                  background: 'linear-gradient(to right, #e21b5a, #f2722c)',
-                  border: 'none',
-                  borderRadius: '50px',
-                  padding: '12px 24px',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  letterSpacing: '1px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(226, 27, 90, 0.4)',
-                  transition: 'opacity 0.2s'
-                }}
-              >
-                <span style={{ flexGrow: 1, textAlign: 'center', marginLeft: '24px' }}>
-                  {loading ? 'LOGGING IN...' : 'LOG IN'}
-                </span>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" className="bi bi-chevron-right" viewBox="0 0 16 16">
-                    <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                  </svg>
-                </div>
-              </button>
-            </form>
+              </form>
+            </div>
           </div>
+
         </div>
-      </div>
+      </main>
     </div>
   );
 };

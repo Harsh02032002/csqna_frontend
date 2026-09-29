@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, FileCheck, FileQuestion, Globe, Minus, Plus, Target } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 import { useCMS } from '../../utils/useCMS';
 
 export const Iso: React.FC = () => {
@@ -33,137 +36,72 @@ export const Iso: React.FC = () => {
     }
   ];
 
+  const isoDomains = [
+    { num: "01", title: "Context & Leadership (Clauses 4-5)", desc: "Understanding organizational context, interested parties, ISMS scope, top management commitment, and security policy." },
+    { num: "02", title: "Risk Assessment & Planning (Clause 6)", desc: "Information security risk assessment process, risk treatment planning, and Statement of Applicability (SoA)." },
+    { num: "03", title: "Support & Operation (Clauses 7-8)", desc: "Resource allocation, competence management, documented information controls, and operational risk execution." },
+    { num: "04", title: "Annex A Controls (93 Controls)", desc: "Organizational controls, People controls, Physical controls, and Technological security controls (2022 update)." },
+  ];
+
   return (
-    <div className="cert-page">
-      <div className="rt-breadcump breaducump-style-2" style={{ 
-        position: 'relative', 
-        height: '280px', 
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0e1620 0%, #202b3c 100%)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)'
-      }}>
-        {/* Abstract Grid/Dot Pattern */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-          opacity: 0.4
-        }}></div>
-        {/* Glow circles */}
-        <div style={{
-          position: 'absolute',
-          top: '-20%',
-          right: '10%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%)',
-          filter: 'blur(30px)'
-        }}></div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-x-hidden antialiased selection:bg-purple-500 selection:text-white">
 
-        {/* Dynamic SVG Object on the Right */}
-        <div style={{
-          position: 'absolute',
-          right: '8%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '180px',
-          height: '180px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1
-        }}>
-          <svg width="130" height="130" viewBox="0 0 24 24" fill="none" stroke="url(#isoGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 15px rgba(99, 102, 241, 0.5))' }}>
-            <defs>
-              <linearGradient id="isoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#818cf8" />
-                <stop offset="100%" stopColor="#6366f1" />
-              </linearGradient>
-            </defs>
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8v8" />
-            <path d="M8 12h8" />
-          </svg>
-        </div>
-
-        <div style={{ position: 'relative', zIndex: 2 }} className="container">
-          <div className="row align-items-left" style={{ paddingTop: '80px' }}>
-            <div className="col-lg-7 col-md-9">
-              <h1 className="f-size-50 f-size-lg-40 f-size-md-30 f-size-xs-22 rt-strong text-uppercase" data-content-key="iso_banner_title">
-                {t('iso_banner_title', 'ISO 27001')}
-              </h1>
-            </div>
-          </div>
-        </div>
+      <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-xs text-amber-800">
+        <span className="font-bold">⚠️ Disclaimer:</span> We are not affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with ISO or IEC.
       </div>
 
-      <div className="rt-spacer-10"></div>
-
-      <section className="page-content-area bg-elements-parent">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-7 text-left">
-
-              <p className="rt-light3 f-size-20 line-height-34 rt-mb-20 font-weight-bold" data-content-key="iso_hero_subtitle">
-                {t('iso_hero_subtitle', 'ISO/IEC 27001:2022 Certification - Information Security Management System (ISMS)')}
-              </p>
-              <p className="f-size-16 line-height-30" data-content-key="iso_hero_desc">
-                {t('iso_hero_desc', "Establish, implement, maintain, and continually improve your organization's information security management system to protect assets and build customer trust.")}
-              </p>
-              <div className="rt-spacer-30"></div>
-              <div className="d-flex gap-3">
-                <a href="#exam-details" className="rt-btn rt-gradient pill text-uppercase rt-Bshadow-1 rt-sm2">Audit Details</a>
-                <a href="#eligibility" className="rt-btn pill text-uppercase rt-sm2 bg-secondary text-white">Check Readiness</a>
-              </div>
+      <section className="relative py-8 lg:py-12 px-4 sm:px-6 lg:px-8 max-w-[1340px] mx-auto overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="lg:col-span-7 z-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E8F5E9] text-[#16A34A] text-[11px] font-extrabold uppercase tracking-widest border border-[#BBF7D0] shadow-sm mb-4">
+              <FileCheck className="h-3.5 w-3.5 text-[#16A34A]" />
+              <span>ISMS COMPLIANCE STANDARD PREP</span>
             </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight mb-4">
+              ISO 27001:2022 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600">ISMS Auditor</span> Practice Tests
+            </h1>
+            <p className="text-[#64748B] text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mb-8">
+              Prepare for ISO 27001 Lead Auditor &amp; Lead Implementer certification exams with 1,100+ Annex A control &amp; ISMS clause scenario questions aligned with the 2022 framework.
+            </p>
+            <div className="flex flex-wrap gap-4 mb-8">
+              <Link to="/register">
+                <Button variant="hero" size="hero" className="px-8 shadow-lg">START ISO 27001 PRACTICE FREE <ArrowRight className="h-4 w-4" /></Button>
+              </Link>
+              <Link to="/pricing">
+                <Button variant="heroOutline" size="hero" className="px-7">VIEW PRICING PLANS</Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-200/80">
+              {["1,100+ Questions", "93 Annex A Controls", "Lead Auditor Aligned", "2022 Updated"].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /><span>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-            <div className="col-lg-5 mt-5 mt-lg-0">
-              <div className="credential-card text-left">
-                <div className="d-flex justify-content-between align-items-start mb-4">
-                  <div className="d-flex align-items-center gap-2">
-                    <div className="d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                      <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>★</span>
-                    </div>
-                    <div>
-                      <h4 className="text-uppercase m-0" style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '1px', color: '#d8b4fe' }}>CSQNA Prep Pack</h4>
-                      <p className="m-0" style={{ fontSize: '9px', color: '#94a3b8' }}>VERIFIED PREP MATERIAL</p>
-                    </div>
+          <div className="lg:col-span-5 relative flex justify-center">
+            <div className="relative w-full max-w-[420px]">
+              <div className="absolute -top-5 right-2 text-emerald-600 font-extrabold text-xs tracking-wider rotate-6 flex items-center gap-1 z-20">
+                <span>ISMS Certified<br />Lead Auditor Ready</span><span className="text-xl">⤵</span>
+              </div>
+              <div className="relative rounded-3xl bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 p-7 text-white shadow-2xl border border-emerald-500/20 overflow-hidden">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-emerald-300 text-[10px] font-extrabold uppercase tracking-widest border border-white/10">ISO 27001:2022</span>
+                  <FileCheck className="h-6 w-6 text-emerald-300" />
+                </div>
+                <div className="space-y-4 my-6">
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div><div className="text-[10px] font-bold text-emerald-200">AUDIT QUESTIONS</div><div className="text-2xl font-black text-white">1,100+</div></div>
+                    <FileQuestion className="h-8 w-8 text-emerald-300" />
                   </div>
-                  <div>
-                    <span className="badge bg-success text-white" style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '50px' }}>Active</span>
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div><div className="text-[10px] font-bold text-emerald-200">CLAUSES &amp; CONTROLS</div><div className="text-2xl font-black text-white">93 Controls</div></div>
+                    <Globe className="h-8 w-8 text-teal-300" />
                   </div>
                 </div>
-
-                <div className="mb-4">
-                  <h3 className="text-white text-uppercase mb-1" style={{ fontSize: '20px', fontWeight: 'bold' }}>ISO 27001</h3>
-                  <p className="mb-3" style={{ fontSize: '12px', color: '#cbd5e1' }}>Information Security Management System</p>
-                  
-                  <div className="p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
-                    <div className="row">
-                      <div className="col-6">
-                        <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase' }}>Annex Controls</span>
-                        <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fbbf24' }}>93 Controls</span>
-                      </div>
-                      <div className="col-6">
-                        <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase' }}>Themes</span>
-                        <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fbbf24' }}>4 Themes</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="d-flex justify-content-between align-items-center pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '8px', color: '#94a3b8', textTransform: 'uppercase' }}>Support Email</span>
-                    <span style={{ fontSize: '11px', color: '#d8b4fe' }}>info@csqna.com</span>
-                  </div>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#fbbf24' }}>SEAL</span>
-                  </div>
+                <div className="pt-2 flex items-center justify-between text-[11px] font-bold text-emerald-200">
+                  <span>Statement of Applicability (SoA)</span><span className="text-emerald-400">2022 Standard</span>
                 </div>
               </div>
             </div>
@@ -171,111 +109,59 @@ export const Iso: React.FC = () => {
         </div>
       </section>
 
-      <div className="rt-spacer-100"></div>
-      <section id="exam-details" style={{ background: '#F6F7FA', padding: '60px 0' }}>
-        <div className="container">
-          <h2 className="rt-section-title text-center">ISO 27001 Certification Details</h2>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { title: 'Audit Duration', desc: 'Stage 1 and Stage 2 audits completed by accredited bodies. Varies by organization size and scope complexity.' },
-              { title: 'Accredited Bodies', desc: 'Certified by registrars like BSI, DNV, LRQA, SGS. Recognized globally via IAF accreditation.' },
-              { title: 'Audit Format', desc: 'Stage 1: Documentation review of ISMS scope. Stage 2: On-site implementation audit and interviews.' },
-              { title: 'Audit Mode', desc: 'On-site and remote audits consisting of evidence checking and process reviews.' },
-              { title: 'Scoring & Passing', desc: 'Requires zero major non-conformities. Minor non-conformities require a Corrective Action Plan.' },
-              { title: 'Implementation Costs', desc: 'Typical range: $15,000 – $100,000+. Depends on employee count, locations, and maturity.' }
-            ].map((item, i) => (
-              <div className="col-md-4 col-sm-6 rt-mb-30" key={i}>
-                <div className="blue-block" style={{ height: '100%', padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#854c93' }}>{item.title}</h3>
-                  <p className="mt-2">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <main className="py-6 sm:py-10 space-y-16 max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div className="rt-spacer-100"></div>
-      <section id="domains" className="page-content-area">
-        <div className="container">
-          <h2 className="rt-section-title text-center">ISO Clauses & Annex A Controls</h2>
-          <p className="text-center section-p-content max-w-2xl mx-auto">
-            {t('iso_domains_intro', 'ISO/IEC 27001:2022 organizes 93 controls into 4 thematic themes alongside 11 core clauses that mandate how the ISMS must be designed and reviewed.')}
-          </p>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { icon: '📋', title: 'Core Clauses', desc: 'ISMS Scope & Setup (Clauses 4-10 covering Leadership, Planning, Support, Operations, Evaluation, Improvement)', badge: 'Clauses 4-10' },
-              { icon: '🏢', title: 'Theme 1', desc: 'Organizational Controls (Policies, roles, teleworking, threat intelligence, asset management, access controls)', badge: '37 Controls' },
-              { icon: '👥', title: 'Theme 2 & 3', desc: 'People & Physical Controls (Screening, awareness, perimeters, entry control, clear desk, security in office)', badge: '22 Controls' },
-              { icon: '💻', title: 'Theme 4', desc: 'Technological Controls (Access control, cryptography, vulnerability management, logging, secure development)', badge: '34 Controls' }
-            ].map((d, i) => (
-              <div className="col-md-3 col-sm-6 rt-mb-30" key={i}>
-                <div className="blue-block text-center" style={{ height: '100%', padding: '25px', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '40px', marginBottom: '15px' }}>{d.icon}</div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>{d.title}</h3>
-                  <p className="f-size-14">{d.desc}</p>
-                  <span style={{ display: 'inline-block', background: '#854c93', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold', marginTop: '10px', fontSize: '13px' }}>{d.badge}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="rt-spacer-100"></div>
-      <section id="eligibility" style={{ background: '#F6F7FA', padding: '60px 0' }}>
-        <div className="container">
-          <h2 className="rt-section-title text-center">Certification Readiness</h2>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { title: 'Organizational Scope', items: ['Applicable to organizations of all sizes and sectors seeking to secure client data.', 'Requires defining a clear ISMS scope detailing business processes and systems.'] },
-              { title: 'System Implementation', items: ['Requires a fully implemented ISMS operating for a minimum of 3 months.', 'Must generate sufficient execution records to serve as audit evidence.'] },
-              { title: 'Auditing & Review', items: ['An internal audit of all applicable controls must be completed.', 'A formal management review of the ISMS must be documented before external audit.'] }
-            ].map((card, i) => (
-              <div className="col-md-4 rt-mb-30" key={i}>
-                <div style={{ padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0', height: '100%' }}>
-                  <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#854c93', marginBottom: '15px' }}>{card.title}</h3>
-                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', color: '#555' }}>
-                    {card.items.map((item, j) => <li className="rt-mb-10" key={j}>{item}</li>)}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="rt-spacer-100"></div>
-      <section id="faq" className="faq-area bg-elements-parent">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12">
-              <h2 className="rt-section-title">Frequently Asked Questions</h2>
-              <p className="rt-light3 line-height-34 rt-mb-0 section-p-content">Find answers to the most frequently asked questions here</p>
-              <div className="rt-spacer-30"></div>
-              <div id="accordion">
-                {faqs.map((faq, index) => {
-                  const isOpen = activeFaq === index;
-                  return (
-                    <div className="faq-card" key={index}>
-                      <div className="faq-header" onClick={() => setActiveFaq(isOpen ? null : index)}>
-                        <h5 data-content-key={faq.key_q}>{t(faq.key_q, faq.question)}</h5>
-                        <div className="faq-icon" style={{ backgroundColor: '#854c93', color: '#fff' }}>{isOpen ? '−' : '+'}</div>
-                      </div>
-                      {isOpen && <div className="faq-body" data-content-key={faq.key_a}>{t(faq.key_a, faq.answer)}</div>}
-                    </div>
-                  );
-                })}
-              </div>
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E8F5E9] text-[#16A34A] text-[11px] font-extrabold uppercase tracking-widest border border-[#BBF7D0] shadow-sm mb-3">
+              <Target className="h-3.5 w-3.5 text-[#16A34A]" /><span>ISMS CLAUSES &amp; CONTROLS</span>
             </div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">ISMS Core Auditing Modules</h2>
           </div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isoDomains.map((d) => (
+              <div key={d.num} className="group rounded-3xl bg-white p-7 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 font-black text-sm flex items-center justify-center mb-5">{d.num}</div>
+                  <h3 className="text-lg font-bold text-[#0F172A] mb-3 leading-snug group-hover:text-emerald-600 transition-colors">{d.title}</h3>
+                  <p className="text-xs sm:text-sm font-medium text-[#64748B] leading-relaxed mb-6">{d.desc}</p>
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition-transform">
+                  <span>Practice Module</span><ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <div className="rt-spacer-100"></div>
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] leading-tight mb-2">Frequently Asked Questions</h2>
+            <p className="text-sm font-medium text-[#64748B]">Find answers to the most common questions about ISO 27001</p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-3" id="accordion">
+            {faqs.map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <div key={index} className={`rounded-2xl border transition-all duration-200 ${isOpen ? 'border-emerald-200 bg-emerald-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                  <button className="w-full flex items-center justify-between p-5 text-left" onClick={() => setActiveFaq(isOpen ? null : index)}>
+                    <span className="font-bold text-sm text-[#0F172A] leading-snug pr-4">{t(faq.key_q, faq.question)}</span>
+                    <span className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${isOpen ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {isOpen ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-emerald-100 pt-4">
+                      {t(faq.key_a, faq.answer)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 };

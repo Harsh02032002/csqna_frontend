@@ -1,4 +1,17 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  FileQuestion,
+  Minus,
+  Plus,
+  ShieldAlert,
+  Target,
+  Terminal,
+} from 'lucide-react';
+import { Button } from '../../components/ui/button';
 import { useCMS } from '../../utils/useCMS';
 
 export const Ceh: React.FC = () => {
@@ -7,293 +20,275 @@ export const Ceh: React.FC = () => {
 
   const faqs = [
     {
-      key_q: "ceh_faq_q1",
-      key_a: "ceh_faq_a1",
       question: "What is the difference between CEH and CEH Practical?",
       answer: "CEH multiple-choice is a 4-hour conceptual and method-based assessment. CEH Practical is a 6-hour hands-on challenge in a live lab environment where you must exploit hosts, analyze payloads, and solve 20 penetration challenges. Earning both grants the CEH Master title."
     },
     {
-      key_q: "ceh_faq_q2",
-      key_a: "ceh_faq_a2",
       question: "How difficult is the CEH exam?",
       answer: "CEH is moderately challenging. Preparing requires solid networking foundations, knowledge of port scanning metrics, payload design, and command-line usage of key pentesting utilities like Nmap, Metasploit, Wireshark, and Hashcat."
     },
     {
-      key_q: "ceh_faq_q3",
-      key_a: "ceh_faq_a3",
       question: "What is the retake policy?",
       answer: "If you fail, there is no waiting period for the first retake. However, subsequent retakes require a 14-day waiting period. There is a maximum limit of 5 attempts per year, and exam retake fees apply."
     }
   ];
 
+  const cehDomains = [
+    { num: "01", title: "Footprinting & Reconnaissance", weight: "18% Exam Weight", desc: "OSINT gathering, DNS enumeration, network scanning, and target profiling." },
+    { num: "02", title: "Vulnerability Analysis & Exploitation", weight: "22% Exam Weight", desc: "Nessus analysis, Metasploit payload development, buffer overflows, and privilege escalation." },
+    { num: "03", title: "Web App & Wireless Security", weight: "20% Exam Weight", desc: "SQL injection, XSS, CSRF vulnerabilities, WPA3 attacks, and web app firewalls." },
+    { num: "04", title: "Malware & Threat Vectors", weight: "20% Exam Weight", desc: "Ransomware mechanics, trojans, rootkits, steganography, and reverse engineering basics." },
+    { num: "05", title: "Cryptography & Cloud Security", weight: "20% Exam Weight", desc: "Public key infrastructure, AES encryption, cloud computing threats, and container security." },
+  ];
+
+  const examMetrics = [
+    { title: 'Exam Duration', desc: 'Candidates will have exactly 4 Hours (240 minutes) to complete the theoretical exam.' },
+    { title: 'Questions', desc: 'Consists of 125 Multiple-Choice Questions testing knowledge of security controls and tools.' },
+    { title: 'Passing Score', desc: 'Varies dynamically based on exam difficulty, typically ranging between 60% and 85%.' },
+    { title: 'Testing Format', desc: 'Delivered online via the ECC Exam Portal or at authorized Pearson VUE testing centers.' },
+    { title: 'Exam Version', desc: 'Currently testing version v12, featuring updated modules on OT hacking and cloud threats.' },
+    { title: 'Maintenance', desc: 'Requires reporting a minimum of 120 ECE credits every 3 years to maintain active credential.' }
+  ];
+
   return (
-    <div className="cert-page">
-      <div className="rt-breadcump breaducump-style-2" style={{ 
-        position: 'relative', 
-        height: '280px', 
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0e051c 0%, #2e0e3a 100%)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)'
-      }}>
-        {/* Abstract Grid/Dot Pattern */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-          opacity: 0.4
-        }}></div>
-        {/* Glow circles */}
-        <div style={{
-          position: 'absolute',
-          top: '-20%',
-          right: '10%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(133, 76, 147, 0.4) 0%, transparent 70%)',
-          filter: 'blur(30px)'
-        }}></div>
-
-        {/* Dynamic SVG Object on the Right */}
-        <div style={{
-          position: 'absolute',
-          right: '8%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '180px',
-          height: '180px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1
-        }}>
-          <svg width="130" height="130" viewBox="0 0 24 24" fill="none" stroke="url(#cehGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 15px rgba(167, 139, 250, 0.5))' }}>
-            <defs>
-              <linearGradient id="cehGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#a78bfa" />
-                <stop offset="100%" stopColor="#ec4899" />
-              </linearGradient>
-            </defs>
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            <circle cx="12" cy="11" r="3" />
-            <path d="M12 12v3" />
-          </svg>
-        </div>
-
-        <div style={{ position: 'relative', zIndex: 2 }} className="container">
-          <div className="row align-items-left" style={{ paddingTop: '80px' }}>
-            <div className="col-lg-7 col-md-9">
-              <div className="disclaimer-banner">
-                <span className="disclaimer-title">⚠️ Disclaimer:</span>
-                <span className="disclaimer-text">We are not affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with EC-Council.</span>
-              </div>
-              <h1 className="f-size-50 f-size-lg-40 f-size-md-30 f-size-xs-22 rt-strong text-uppercase" data-content-key="ceh_banner_title">
-                {t('ceh_banner_title', 'CEH')}
-              </h1>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-x-hidden antialiased selection:bg-purple-500 selection:text-white">
+      
+      {/* Disclaimer Banner */}
+      <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-xs text-amber-800">
+        <span className="font-bold">⚠️ Disclaimer:</span> We are not affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with EC-Council.
       </div>
 
-      <div className="rt-spacer-10"></div>
-
-      <section className="page-content-area bg-elements-parent">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-7 text-left">
-
-              <p className="rt-light3 f-size-20 line-height-34 rt-mb-20 font-weight-bold">
-                Certified Ethical Hacker - Master the hacking technologies and techniques used by threat groups.
-              </p>
-              <p className="f-size-16 line-height-30">
-                EC-Council's Certified Ethical Hacker (CEH) is the premier credential validating your ability to audit operational risk, identify network vulnerabilities, and think like a hacker to secure enterprise systems.
-              </p>
-              <div className="rt-spacer-30"></div>
-              <div className="d-flex gap-3">
-                <a href="#exam-details" className="rt-btn rt-gradient pill text-uppercase rt-Bshadow-1 rt-sm2">Exam Details</a>
-                <a href="#eligibility" className="rt-btn pill text-uppercase rt-sm2 bg-secondary text-white">Check Eligibility</a>
-              </div>
+      {/* Hero Section */}
+      <section className="relative py-8 lg:py-12 px-4 sm:px-6 lg:px-8 max-w-[1340px] mx-auto overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          
+          {/* Left Column */}
+          <div className="lg:col-span-7 z-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF3E0] text-[#F97316] text-[11px] font-extrabold uppercase tracking-widest border border-[#FED7AA] shadow-sm mb-4">
+              <Terminal className="h-3.5 w-3.5 text-[#F97316]" />
+              <span>EC-COUNCIL CEH CERTIFICATION PREP</span>
             </div>
-
-            <div className="col-lg-5 mt-5 mt-lg-0">
-              <div className="credential-card text-left">
-                <div className="d-flex justify-content-between align-items-start mb-4">
-                  <div className="d-flex align-items-center gap-2">
-                    <div className="d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                      <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>★</span>
-                    </div>
-                    <div>
-                      <h4 className="text-uppercase m-0" style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '1px', color: '#d8b4fe' }}>CSQNA Prep Pack</h4>
-                      <p className="m-0" style={{ fontSize: '9px', color: '#94a3b8' }}>VERIFIED PREP MATERIAL</p>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="badge bg-success text-white" style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '50px' }}>Active</span>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="text-white text-uppercase mb-1" style={{ fontSize: '20px', fontWeight: 'bold' }}>CEH v12</h3>
-                  <p className="mb-3" style={{ fontSize: '12px', color: '#cbd5e1' }}>Certified Ethical Hacker Prep</p>
-                  
-                  <div className="p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}>
-                    <div className="row">
-                      <div className="col-6">
-                        <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase' }}>Exam Questions</span>
-                        <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fbbf24' }}>125 Qs</span>
-                      </div>
-                      <div className="col-6">
-                        <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase' }}>Phases</span>
-                        <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fbbf24' }}>4 Phases</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="d-flex justify-content-between align-items-center pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '8px', color: '#94a3b8', textTransform: 'uppercase' }}>Support Email</span>
-                    <span style={{ fontSize: '11px', color: '#d8b4fe' }}>info@csqna.com</span>
-                  </div>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#fbbf24' }}>SEAL</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Exam Details Section */}
-      <div className="rt-spacer-100"></div>
-      <section id="exam-details" className="lightpinkbg" style={{ background: '#F6F7FA', padding: '60px 0' }}>
-        <div className="container">
-          <h2 className="rt-section-title text-center" style={{ color: '#854c93' }}>Exam Metrics</h2>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { title: 'Exam Duration', desc: 'Candidates will have exactly 4 Hours (240 minutes) to complete the theoretical exam.' },
-              { title: 'Questions', desc: 'Consists of 125 Multiple-Choice Questions testing knowledge of security controls and tools.' },
-              { title: 'Passing Score', desc: 'Varies dynamically based on exam difficulty, typically ranging between 60% and 85%.' },
-              { title: 'Testing Format', desc: 'Delivered online via the ECC Exam Portal or at authorized Pearson VUE testing centers.' },
-              { title: 'Exam Version', desc: 'Currently testing version v12, featuring updated modules on OT hacking and cloud threats.' },
-              { title: 'Maintenance', desc: 'Requires reporting a minimum of 120 ECE credits every 3 years to maintain active credential.' }
-            ].map((item, i) => (
-              <div className="col-md-4 col-sm-6 rt-mb-30" key={i}>
-                <div className="blue-block" style={{ height: '100%', padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#854c93' }}>{item.title}</h3>
-                  <p className="mt-2">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Modules Section */}
-      <div className="rt-spacer-100"></div>
-      <section id="domains" className="page-content-area">
-        <div className="container">
-          <h2 className="rt-section-title text-center" style={{ color: '#854c93' }}>CEH v12 Module Phases</h2>
-          <p className="text-center section-p-content max-w-2xl mx-auto">
-            The CEH curriculum is structured into four main phases covering 20 security and hacking modules.
-          </p>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
-            {[
-              { icon: '🔍', title: 'Phase 1', desc: 'Information Gathering & Recon (Footprinting, Scanning, and Enumeration modules 1-4)' },
-              { icon: '💻', title: 'Phase 2', desc: 'Threats & System Attacks (System Exploitation, Malware, and Sniffing modules 5-8)' },
-              { icon: '🌐', title: 'Phase 3', desc: 'Web & Network Attacks (Evading Firewalls, SQLi, and Cloud/IoT hacking modules 9-15)' },
-              { icon: '🛡️', title: 'Phase 4', desc: 'Controls & Protections (IDS Evasion, Cryptography, and Wireless Sec modules 16-20)' }
-            ].map((d, i) => (
-              <div className="col-md-3 col-sm-6 rt-mb-30" key={i}>
-                <div className="blue-block text-center" style={{ height: '100%', padding: '25px', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '40px', marginBottom: '15px' }}>{d.icon}</div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>{d.title}</h3>
-                  <p className="f-size-14">{d.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Eligibility Section */}
-      <div className="rt-spacer-100"></div>
-      <section id="eligibility" style={{ background: '#F6F7FA', padding: '60px 0' }}>
-        <div className="container">
-          <h2 className="rt-section-title text-center" style={{ color: '#854c93' }}>Eligibility Requirements</h2>
-          <div className="rt-spacer-40"></div>
-          <div className="row">
             
-            <div className="col-md-6 rt-mb-30">
-              <div style={{ padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0', height: '100%' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#854c93', marginBottom: '15px' }}>Self-Study Path</h3>
-                <ul style={{ listStyleType: 'disc', paddingLeft: '20px', color: '#555' }}>
-                  <li className="rt-mb-10">Must document a minimum of 2 years of professional work experience in information security.</li>
-                  <li className="rt-mb-10">Pay a non-refundable eligibility application processing fee of $100 USD.</li>
-                  <li className="rt-mb-10">EC-Council reviews and verifies credentials before approving voucher purchases.</li>
-                </ul>
-              </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight mb-4">
+              CEH <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-red-600 to-purple-600">Ethical Hacker</span> Practice Tests
+            </h1>
+            
+            <p className="text-[#64748B] text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mb-8">
+              Prepare for the Certified Ethical Hacker exam with 900+ tactical practice questions covering reconnaissance, vulnerability analysis, exploitation techniques, malware threats, and cloud security.
+            </p>
+            
+            <div className="flex flex-wrap gap-4 mb-8">
+              <Link to="/register">
+                <Button variant="hero" size="hero" className="px-8 shadow-lg">
+                  START CEH PRACTICE FREE <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/pricing">
+                <Button variant="heroOutline" size="hero" className="px-7">
+                  VIEW PRICING PLANS
+                </Button>
+              </Link>
             </div>
 
-            <div className="col-md-6 rt-mb-30">
-              <div style={{ padding: '30px', background: '#fff', borderRadius: '8px', border: '1px solid #E2E8F0', height: '100%' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#854c93', marginBottom: '15px' }}>Training Path</h3>
-                <ul style={{ listStyleType: 'disc', paddingLeft: '20px', color: '#555' }}>
-                  <li className="rt-mb-10">Attend an official EC-Council training course (in-person, online, or self-paced).</li>
-                  <li className="rt-mb-10">The 2-year work experience prerequisite is fully waived upon course completion.</li>
-                  <li className="rt-mb-10">Voucher can be purchased immediately after concluding the training modules.</li>
-                </ul>
-              </div>
+            {/* Feature Badges */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-200/80">
+              {["900+ Questions", "5 Hacking Modules", "Real Threat Vectors", "CEH v12 Blueprint"].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>{f}</span>
+                </div>
+              ))}
             </div>
-
           </div>
-        </div>
-      </section>
 
-      {/* FAQ Section */}
-      <div className="rt-spacer-100"></div>
-      <section id="faq" className="faq-area bg-elements-parent">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12">
-              <h2 className="rt-section-title" style={{ color: '#854c93' }}>Frequently Asked Questions</h2>
-              <p className="rt-light3 line-height-34 rt-mb-0 section-p-content">
-                Find answers to the most frequently asked questions here
-              </p>
-              <div className="rt-spacer-30"></div>
-              <div id="accordion">
-                {faqs.map((faq, index) => {
-                  const isOpen = activeFaq === index;
-                  return (
-                    <div className="faq-card" key={index}>
-                      <div className="faq-header" onClick={() => setActiveFaq(isOpen ? null : index)}>
-                        <h5>{faq.question}</h5>
-                        <div className="faq-icon" style={{ backgroundColor: '#854c93', color: '#fff' }}>
-                          {isOpen ? '−' : '+'}
-                        </div>
-                      </div>
-                      
-                      {isOpen && (
-                        <div className="faq-body">
-                          {faq.answer}
-                        </div>
-                      )}
+          {/* Right Column Visual Graphic */}
+          <div className="lg:col-span-5 relative flex justify-center">
+            <div className="relative w-full max-w-[420px]">
+              <div className="absolute -top-5 right-2 text-orange-600 font-extrabold text-xs tracking-wider rotate-6 flex items-center gap-1 z-20">
+                <span>Tactical Prep<br />CEH v12 Ready</span>
+                <span className="text-xl">⤵</span>
+              </div>
+
+              <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 via-stone-900 to-red-950 p-7 text-white shadow-2xl border border-orange-500/20 overflow-hidden">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-orange-300 text-[10px] font-extrabold uppercase tracking-widest border border-white/10">EC-COUNCIL CEH</span>
+                  <Terminal className="h-6 w-6 text-orange-400" />
+                </div>
+
+                <div className="space-y-4 my-6">
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] font-bold text-orange-200">TACTICAL QUESTIONS</div>
+                      <div className="text-2xl font-black text-white">900+</div>
                     </div>
-                  );
-                })}
+                    <FileQuestion className="h-8 w-8 text-orange-300" />
+                  </div>
+
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] font-bold text-orange-200">MODULE BREAKDOWN</div>
+                      <div className="text-2xl font-black text-white">5 Modules</div>
+                    </div>
+                    <ShieldAlert className="h-8 w-8 text-red-300" />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between text-[11px] font-bold text-orange-200">
+                  <span>Questions: 125 Mocks</span>
+                  <span className="text-emerald-400">CEH v12 Aligned</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="rt-spacer-100"></div>
+      {/* Main Container */}
+      <main className="py-6 sm:py-10 space-y-16 max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* DOMAINS SECTION */}
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF3E0] text-[#F97316] text-[11px] font-extrabold uppercase tracking-widest border border-[#FED7AA] shadow-sm mb-3">
+              <Target className="h-3.5 w-3.5 text-[#F97316]" />
+              <span>TACTICAL MODULES</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">
+              CEH 5 Official Exam Modules
+            </h2>
+            <p className="mt-2 text-sm sm:text-base font-medium text-[#64748B]">
+              Master the core modules specified in the EC-Council CEH v12 framework.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cehDomains.map((d) => (
+              <div key={d.num} className="group rounded-3xl bg-white p-7 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <span className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-700 font-black text-sm flex items-center justify-center">
+                      {d.num}
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200 text-xs font-extrabold">
+                      {d.weight}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-bold text-[#0F172A] mb-3 leading-snug group-hover:text-orange-600 transition-colors">
+                    {d.title}
+                  </h3>
+
+                  <p className="text-xs sm:text-sm font-medium text-[#64748B] leading-relaxed mb-6">
+                    {d.desc}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                  <span>Practice Module Questions</span>
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* EXAM METRICS SECTION */}
+        <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 sm:p-12">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF3E0] text-[#F97316] text-[11px] font-extrabold uppercase tracking-widest border border-[#FED7AA] shadow-sm mb-3">
+              <FileQuestion className="h-3.5 w-3.5 text-[#F97316]" />
+              <span>EXAM METRICS</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] leading-tight">CEH Exam Details</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {examMetrics.map((item) => (
+              <div key={item.title} className="rounded-2xl border border-slate-100 bg-slate-50 p-6 hover:border-orange-200 hover:bg-orange-50/40 transition-colors">
+                <h3 className="text-base font-bold text-orange-700 mb-2">{item.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ELIGIBILITY SECTION */}
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF3E0] text-[#F97316] text-[11px] font-extrabold uppercase tracking-widest border border-[#FED7AA] shadow-sm mb-3">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#F97316]" />
+              <span>ELIGIBILITY</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] leading-tight">Requirements to Appear</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                title: "Self-Study Path",
+                items: [
+                  "Must document a minimum of 2 years of professional work experience in information security.",
+                  "Pay a non-refundable eligibility application processing fee of $100 USD.",
+                  "EC-Council reviews and verifies credentials before approving voucher purchases.",
+                ]
+              },
+              {
+                title: "Training Path",
+                items: [
+                  "Attend an official EC-Council training course (in-person, online, or self-paced).",
+                  "The 2-year work experience prerequisite is fully waived upon course completion.",
+                  "Voucher can be purchased immediately after concluding the training modules.",
+                ]
+              }
+            ].map((path) => (
+              <div key={path.title} className="rounded-3xl bg-white border border-slate-100 shadow-sm p-8">
+                <h3 className="text-xl font-bold text-orange-700 mb-4">{path.title}</h3>
+                <ul className="space-y-3">
+                  {path.items.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ SECTION */}
+        <section>
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] leading-tight mb-2">Frequently Asked Questions</h2>
+            <p className="text-sm font-medium text-[#64748B]">Find answers to the most common questions about the CEH certification</p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-3" id="accordion">
+            {faqs.map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <div
+                  key={index}
+                  className={`rounded-2xl border transition-all duration-200 ${isOpen ? 'border-orange-200 bg-orange-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                >
+                  <button
+                    className="w-full flex items-center justify-between p-5 text-left"
+                    onClick={() => setActiveFaq(isOpen ? null : index)}
+                  >
+                    <span className="font-bold text-sm text-[#0F172A] leading-snug pr-4">{faq.question}</span>
+                    <span className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${isOpen ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {isOpen ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-orange-100 pt-4">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 };

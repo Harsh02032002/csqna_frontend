@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
+import { ArrowRight, Eye, EyeOff, Lock, Mail, Phone, ShieldCheck, User } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Toast, ToastType } from '../components/ui/Toast';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -19,358 +22,345 @@ export const Register: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Toast state
+  const [toast, setToast] = useState<{ type: ToastType; title?: string; message: string } | null>(null);
+
+  const triggerToast = (type: ToastType, title: string, message: string) => {
+    setToast({ type, title, message });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
+    // Pre-validations
+    if (!firstName.trim() || !lastName.trim()) {
+      const msg = 'Please enter both your First Name and Last Name.';
+      setError(msg);
+      triggerToast('error', 'Validation Error', msg);
+      return;
+    }
+
+    if (!username.trim()) {
+      const msg = 'Please enter a valid username.';
+      setError(msg);
+      triggerToast('error', 'Validation Error', msg);
+      return;
+    }
+
+    if (password.length < 8) {
+      const msg = 'Password must be at least 8 characters long (up to 25 characters).';
+      setError(msg);
+      triggerToast('error', 'Password Too Short', msg);
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      const msg = 'Passwords do not match. Please re-check.';
+      setError(msg);
+      triggerToast('error', 'Password Mismatch', msg);
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      const msg = 'Phone number must be exactly 10 digits.';
+      setError(msg);
+      triggerToast('error', 'Invalid Phone Number', msg);
       return;
     }
 
     if (!agreeTnc) {
-      setError('You must agree to the Terms and Conditions.');
+      const msg = 'You must agree to the Terms & Conditions and Privacy Policy.';
+      setError(msg);
+      triggerToast('warning', 'Agreement Required', msg);
       return;
     }
 
     setLoading(true);
     try {
       const res = await api.post('/auth/register', {
-        username,
-        first_name: firstName,
-        last_name: lastName,
-        email,
+        username: username.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim(),
         password,
-        phone,
+        phone: cleanPhone,
         countryCode,
         istncaggreed: agreeTnc,
       });
+
       if (res.data && res.data.status) {
-        setSuccess('Registration successful! Please check your email to verify your account.');
-        setTimeout(() => navigate('/login'), 5000);
+        const successMsg = 'Registration successful! Please check your email to verify your account.';
+        setSuccess(successMsg);
+        triggerToast('success', 'Account Created!', successMsg);
+        setTimeout(() => navigate('/login'), 4000);
       } else {
-        setError(res.data?.message || 'Registration failed.');
+        // Backend validation or error message parsing
+        let backendErrorMsg = res.data?.message || 'Registration failed.';
+        if (res.data?.data && typeof res.data.data === 'object') {
+          const fieldErrors = Object.entries(res.data.data)
+            .map(([field, msg]) => `${field.replace('_', ' ')}: ${msg}`)
+            .join(' | ');
+          if (fieldErrors) {
+            backendErrorMsg = fieldErrors;
+          }
+        }
+        setError(backendErrorMsg);
+        triggerToast('error', 'Registration Failed', backendErrorMsg);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration request failed.');
+      let catchMsg = 'Registration request failed. Please try again.';
+      if (err.response?.data?.data && typeof err.response.data.data === 'object') {
+        const fieldErrors = Object.entries(err.response.data.data)
+          .map(([field, msg]) => `${field.replace('_', ' ')}: ${msg}`)
+          .join(' | ');
+        if (fieldErrors) catchMsg = fieldErrors;
+      } else if (err.response?.data?.message) {
+        catchMsg = err.response.data.message;
+      }
+      setError(catchMsg);
+      triggerToast('error', 'Registration Failed', catchMsg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container-fluid p-0" style={{ minHeight: 'calc(100vh - 100px)', display: 'flex', background: '#fff', paddingTop: '100px' }}>
-      <div className="row g-0 w-100" style={{ minHeight: '100%' }}>
-        {/* Left Column - Illustration */}
-        <div className="col-lg-7 d-none d-lg-flex align-items-center justify-content-center" style={{ background: '#f5f8fa', padding: '40px' }}>
-          <img 
-            src="/marketing-assets/images/login/user-login.png" 
-            alt="Register Illustration" 
-            style={{ maxWidth: '80%', height: 'auto', objectFit: 'contain' }} 
-          />
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-x-hidden flex flex-col justify-between antialiased selection:bg-purple-500 selection:text-white relative">
+      
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          duration={6000}
+        />
+      )}
 
-        {/* Right Column - Form */}
-        <div className="col-lg-5 d-flex align-items-center justify-content-center" style={{ padding: '60px 40px', background: '#fff' }}>
-          <div style={{ width: '100%', maxWidth: '420px' }}>
-            <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Register</h2>
-            <p style={{ fontSize: '15px', color: '#64748b', marginBottom: '30px' }}>Create your CSQNA assessment account</p>
+      <main className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex-1 flex items-center justify-center">
+        <div className="w-full max-w-5xl rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.03)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-2">
+          
+          {/* Left Artwork */}
+          <div className="lg:col-span-5 bg-gradient-to-br from-purple-900 via-indigo-950 to-slate-900 p-8 sm:p-10 flex flex-col justify-between border-r border-slate-100 text-white">
+            <div className="relative z-10">
+              <Link to="/" className="flex items-center gap-2">
+                <span className="relative grid h-9 w-7 place-items-center text-blue-400">
+                  <ShieldCheck className="h-8 w-8" strokeWidth={1.8} />
+                  <span className="absolute text-[7px] font-extrabold text-blue-300">Q</span>
+                </span>
+                <span>
+                  <span className="block text-[28px] font-extrabold leading-[0.85] tracking-normal text-red-500">CSQNA</span>
+                  <span className="block pt-1 text-[6px] font-extrabold uppercase leading-none text-purple-200">
+                    Certification practice made simple
+                  </span>
+                </span>
+              </Link>
 
-            {error && (
-              <div className="alert alert-danger" style={{ fontSize: '13px', borderRadius: '8px' }}>
-                {error}
+              <div className="mt-10">
+                <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-purple-200 border border-white/20 mb-3">
+                  Free Registration
+                </span>
+                <h1 className="text-3xl font-black tracking-tight text-white">Create Candidate Account</h1>
+                <p className="mt-3 text-xs sm:text-sm text-purple-100/80 font-medium leading-relaxed">
+                  Gain instant access to cybersecurity practice tests across 23 domain areas and track your scoring progress.
+                </p>
               </div>
-            )}
+            </div>
 
-            {success && (
-              <div className="alert alert-success" style={{ fontSize: '13px', borderRadius: '8px' }}>
-                {success}
-              </div>
-            )}
+            <div className="relative z-10 pt-4 text-[11px] text-purple-200/70 font-semibold border-t border-white/10">
+              Join thousands of cybersecurity candidates practicing on CSQNA.
+            </div>
+          </div>
 
-            <form onSubmit={handleSubmit}>
-              {/* Username field */}
-              <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                  Username
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                  placeholder="e.g. john_doe"
-                />
-              </div>
+          {/* Right Form */}
+          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center bg-white">
+            <div className="max-w-xl mx-auto w-full">
+              <h2 className="text-2xl font-black text-[#0F172A] tracking-tight">Register Candidate Account</h2>
+              <p className="mt-1 text-xs font-semibold text-[#64748B]">Fill in your details below to get started.</p>
 
-              {/* First Name and Last Name fields */}
-              <div className="row g-2 mb-3">
-                <div className="col-6">
-                  <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                      placeholder="e.g. John"
-                    />
+              <form onSubmit={handleSubmit} className="mt-5 space-y-3.5" autoComplete="off">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">First Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
+                      <input
+                        type="text"
+                        required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="John"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">Last Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
+                      <input
+                        type="text"
+                        required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Doe"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="col-6">
-                  <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                      placeholder="e.g. Doe"
-                    />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">Username</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
+                      <input
+                        type="text"
+                        required
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="johndoe"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="john@example.com"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Email Address field */}
-              <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                  placeholder="e.g. john@example.com"
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#0F172A] mb-1">Phone Number (10 Digits)</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="rounded-xl border border-slate-200 bg-slate-50/50 px-2 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none"
+                    >
+                      <option value="91">+91 (IN)</option>
+                      <option value="1">+1 (US)</option>
+                      <option value="44">+44 (UK)</option>
+                    </select>
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="9876543210"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-              {/* Password and Confirm Password fields */}
-              <div className="row g-2 mb-3">
-                <div className="col-6">
-                  <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                      Password
-                    </label>
-                    <div className="d-flex align-items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">Password (Min 8 Chars)</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
                         placeholder="••••••••"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-8 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        style={{ background: 'transparent', border: 'none', color: '#64748b', outline: 'none', cursor: 'pointer', padding: '0 5px' }}
+                        className="absolute right-2.5 top-3 text-[#64748B] hover:text-[#0F172A]"
                       >
-                        {showPassword ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        )}
+                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </button>
                     </div>
                   </div>
-                </div>
-                <div className="col-6">
-                  <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                      Confirm Password
-                    </label>
-                    <div className="d-flex align-items-center">
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-3.5 w-3.5 text-[#64748B]" />
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
                         placeholder="••••••••"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-8 py-2.5 text-xs font-semibold focus:border-purple-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        style={{ background: 'transparent', border: 'none', color: '#64748b', outline: 'none', cursor: 'pointer', padding: '0 5px' }}
+                        className="absolute right-2.5 top-3 text-[#64748B] hover:text-[#0F172A]"
                       >
-                        {showConfirmPassword ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        )}
+                        {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </button>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Phone and Country Code fields */}
-              <div className="row g-2 mb-3">
-                <div className="col-4">
-                  <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                      Code
-                    </label>
-                    <select
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', paddingRight: '20px', cursor: 'pointer' }}
-                    >
-                      <option value="91">+91 (IN)</option>
-                      <option value="1">+1 (US/CA)</option>
-                      <option value="44">+44 (UK)</option>
-                      <option value="971">+971 (AE)</option>
-                      <option value="61">+61 (AU)</option>
-                      <option value="65">+65 (SG)</option>
-                      <option value="93">+93 (AF)</option>
-                      <option value="355">+355 (AL)</option>
-                      <option value="213">+213 (DZ)</option>
-                      <option value="254">+254 (KE)</option>
-                      <option value="234">+234 (NG)</option>
-                      <option value="92">+92 (PK)</option>
-                      <option value="27">+27 (ZA)</option>
-                      <option value="64">+64 (NZ)</option>
-                      <option value="60">+60 (MY)</option>
-                      <option value="86">+86 (CN)</option>
-                      <option value="81">+81 (JP)</option>
-                      <option value="82">+82 (KR)</option>
-                      <option value="49">+49 (DE)</option>
-                      <option value="33">+33 (FR)</option>
-                      <option value="39">+39 (IT)</option>
-                      <option value="34">+34 (ES)</option>
-                      <option value="7">+7 (RU)</option>
-                      <option value="55">+55 (BR)</option>
-                      <option value="54">+54 (AR)</option>
-                      <option value="52">+52 (MX)</option>
-                      <option value="966">+966 (SA)</option>
-                      <option value="20">+20 (EG)</option>
-                      <option value="233">+233 (GH)</option>
-                      <option value="255">+255 (TZ)</option>
-                      <option value="256">+256 (UG)</option>
-                      <option value="30">+30 (GR)</option>
-                      <option value="31">+31 (NL)</option>
-                      <option value="46">+46 (SE)</option>
-                      <option value="47">+47 (NO)</option>
-                      <option value="358">+358 (FI)</option>
-                      <option value="45">+45 (DK)</option>
-                      <option value="41">+41 (CH)</option>
-                      <option value="43">+43 (AT)</option>
-                      <option value="32">+32 (BE)</option>
-                      <option value="351">+351 (PT)</option>
-                      <option value="353">+353 (IE)</option>
-                      <option value="90">+90 (TR)</option>
-                      <option value="62">+62 (ID)</option>
-                      <option value="63">+63 (PH)</option>
-                      <option value="84">+84 (VN)</option>
-                      <option value="66">+66 (TH)</option>
-                    </select>
-                  </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="agreeTnc"
+                    required
+                    checked={agreeTnc}
+                    onChange={(e) => setAgreeTnc(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 cursor-pointer accent-purple-600"
+                  />
+                  <label htmlFor="agreeTnc" className="text-xs font-semibold text-[#64748B] cursor-pointer select-none">
+                    I agree to the{" "}
+                    <Link to="/terms-and-conditions" className="text-purple-600 font-bold hover:underline">
+                      Terms &amp; Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy-policy" className="text-purple-600 font-bold hover:underline">
+                      Privacy Policy
+                    </Link>
+                  </label>
                 </div>
-                <div className="col-8">
-                  <div style={{ background: '#f1f5f9', borderRadius: '8px', padding: '12px 16px' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px', fontWeight: '500', textTransform: 'none' }}>
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      maxLength={10}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                      style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '14px', padding: '0' }}
-                      placeholder="Enter 10-digit number"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Terms and Conditions Checkbox */}
-              <div className="form-check mb-4 text-left d-flex align-items-start">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="agreeTnc"
-                  required
-                  checked={agreeTnc}
-                  onChange={(e) => setAgreeTnc(e.target.checked)}
-                  style={{ position: 'relative', marginLeft: '0', cursor: 'pointer', width: '16px', height: '16px', marginRight: '8px', marginTop: '4px' }}
-                />
-                <label className="form-check-label" htmlFor="agreeTnc" style={{ fontSize: '12px', color: '#475569', cursor: 'pointer', fontWeight: '500', userSelect: 'none', lineHeight: '1.4' }}>
-                  I have read and accept the CSQNA{' '}
-                  <a href="https://csqna.com/terms-and-conditions" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none' }}>Terms & Conditions</a>,{' '}
-                  <a href="https://csqna.com/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none' }}>Privacy Policy</a> and the{' '}
-                  <a href="https://csqna.com/user-consent-agreement" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none' }}>User Consent Agreement</a>.
-                  I grant my consent for my data to be electronically processed and securely stored. My data will not be shared with third parties without my explicit authorization.
-                </label>
-              </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  size="hero"
+                  className="w-full h-11 bg-gradient-to-r from-[#FF3B30] to-[#FF9500] hover:opacity-95 text-white font-black text-xs shadow-md mt-2 border-0"
+                >
+                  {loading ? 'REGISTERING...' : 'CREATE ACCOUNT'} <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
 
-              {/* Already have an account link */}
-              <div className="text-center mb-4" style={{ fontSize: '14px', color: '#475569' }}>
-                <div>
-                  Already have an account? <Link to="/login" style={{ color: '#3b82f6', fontWeight: '600', textDecoration: 'none' }}>Log in</Link>
+                <div className="pt-3 text-center text-xs font-semibold text-[#64748B] border-t border-slate-100 mt-4">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-purple-600 font-bold hover:underline">
+                    Log In
+                  </Link>
                 </div>
-              </div>
-
-              {/* Register Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-100 d-flex align-items-center justify-content-between text-white"
-                style={{
-                  background: 'linear-gradient(to right, #e21b5a, #f2722c)',
-                  border: 'none',
-                  borderRadius: '50px',
-                  padding: '12px 24px',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  letterSpacing: '1px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(226, 27, 90, 0.4)',
-                  transition: 'opacity 0.2s'
-                }}
-              >
-                <span style={{ flexGrow: 1, textAlign: 'center', marginLeft: '24px' }}>
-                  {loading ? 'PROCESSING...' : 'REGISTER'}
-                </span>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" className="bi bi-chevron-right" viewBox="0 0 16 16">
-                    <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                  </svg>
-                </div>
-              </button>
-            </form>
+              </form>
+            </div>
           </div>
+
         </div>
-      </div>
+      </main>
     </div>
   );
 };

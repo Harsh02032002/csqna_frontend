@@ -173,14 +173,14 @@ export const UserLayout: React.FC = () => {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff', fontWeight: '700', fontSize: '13px',
               }}>
-                {user?.name?.charAt(0)?.toUpperCase() || 'H'}
+                {(user?.first_name || user?.username || user?.name || user?.email || 'C').charAt(0).toUpperCase()}
               </div>
               <div style={{ minWidth: 0 }}>
                 <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name) : 'User'}
+                  {user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : (user?.username || (user?.name && !user.name.includes('@') ? user.name : (user?.email ? user.email.split('@')[0] : 'Candidate')))}
                 </p>
                 <p style={{ margin: 0, fontSize: '10px', color: ACCENT, fontWeight: '600', letterSpacing: '0.5px' }}>
-                  {user?.planDetails?.planName?.toUpperCase() || 'FREE PLAN'}
+                  {user?.planDetails?.planName?.toUpperCase() || 'FREE'}
                 </p>
               </div>
             </div>
